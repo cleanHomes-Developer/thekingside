@@ -1,0 +1,535 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum TournamentType {
+  QUALIFIER
+  SEMIFINAL
+  WILDCARD
+  FINAL
+}
+
+enum TournamentStatus {
+  REGISTRATION
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum EntryStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  WAITLIST
+}
+
+enum LedgerEntryType {
+  ENTRY_FEE
+  PLATFORM_FEE
+  STRIPE_FEE
+  PAYOUT
+  REFUND
+}
+
+enum AntiCheatCaseStatus {
+  SOFT_FLAG
+  HARD_FLAG
+  APPEALED
+  RESOLVED
+  DISMISSED
+}
+
+enum AntiCheatRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REJECTED
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum SeasonMode {
+  FREE
+  PAID
+}
+
+enum PrizeMode {
+  GIFT_CARD
+  CASH
+}
+
+enum SponsorTier {
+  PLATINUM
+  GOLD
+  SILVER
+  BRONZE
+}
+
+enum AffiliateCategory {
+  HARDWARE
+  PLATFORMS
+  STREAMING
+  MARKETPLACES
+  GENERAL
+}
+
+enum AffiliateCommissionType {
+  PERCENT
+  FLAT
+  VARIABLE
+}
+
+enum CasualQueueStatus {
+  QUEUED
+  MATCHED
+  LEFT
+}
+
+enum CasualMatchStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABORTED
+}
+
+enum CasualMatchResult {
+  WHITE
+  BLACK
+  DRAW
+  ABORTED
+}
+
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+  name         String
+  displayName  String
+  role         UserRole @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile      Profile?
+  entries      Entry[]
+  tournaments  Tournament[] @relation("TournamentCreator")
+  antiCheatCases AntiCheatCase[]
+  payouts      Payout[]
+  supportTickets SupportTicket[]
+  casualPlayer CasualPlayer?
+}
+
+model Profile {
+  userId            String    @id @db.Uuid
+  age               Int?
+  country           String?
+  lichessUsername   String?
+  lichessUserId     String?
+  lichessAccessToken String?
+  lichessTokenCreatedAt DateTime?
+  lichessLinkedAt   DateTime?
+  stripeConnectAccountId String?
+  stripeConnectStatus String?
+  stripeConnectLinkedAt DateTime?
+  kycStatus         KycStatus @default(PENDING)
+  kycVerifiedAt     DateTime?
+  profilePictureUrl String?
+  bio               String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SeasonConfig {
+  id            Int        @id @default(1)
+  mode          SeasonMode @default(PAID)
+  freePrizePool Decimal    @default(100) @db.Decimal(12, 2)
+  prizeMode     PrizeMode  @default(GIFT_CARD)
+  sponsorshipEnabled Boolean @default(false)
+  sponsorSlots  Int        @default(4)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Sponsor {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String
+  tier        SponsorTier
+  logoUrl     String
+  websiteUrl  String?
+  tagline     String?
+  active      Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([active, sortOrder])
+  @@index([tier])
+}
+
+model AffiliateProgram {
+  id              String                   @id @default(uuid()) @db.Uuid
+  name            String
+  category        AffiliateCategory
+  commissionType  AffiliateCommissionType
+  commissionRange String
+  cookieDuration  String
+  notes           String?
+  affiliateUrl    String
+  enabled         Boolean                  @default(false)
+  sortOrder       Int                      @default(0)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  clicks          AffiliateClick[]
+
+  @@index([category, enabled, sortOrder])
+}
+
+model AffiliateClick {
+  id           String   @id @default(uuid()) @db.Uuid
+  programId    String   @db.Uuid
+  ipAddress    String?
+  userAgent    String?
+  referrer     String?
+  createdAt    DateTime @default(now())
+
+  program      AffiliateProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@index([programId, createdAt])
+}
+
+model Tournament {
+  id             String           @id @default(uuid()) @db.Uuid
+  name           String
+  type           TournamentType
+  status         TournamentStatus @default(REGISTRATION)
+  entryFee       Decimal          @db.Decimal(10, 2)
+  minPlayers     Int              @default(8)
+  maxPlayers     Int
+  currentPlayers Int              @default(0)
+  prizePool      Decimal          @default(0) @db.Decimal(12, 2)
+  startDate      DateTime
+  endDate        DateTime?
+  lockAt         DateTime
+  timeControl    String?
+  seriesKey      String?
+  slotKey        String?
+  description    String?
+  createdBy      String           @db.Uuid
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  creator        User             @relation("TournamentCreator", fields: [createdBy], references: [id])
+  entries        Entry[]
+  matches        Match[]
+  ledgerEntries  PrizePoolLedger[]
+  antiCheatCases AntiCheatCase[]
+  payouts        Payout[]
+  supportTickets SupportTicket[]
+}
+
+model Entry {
+  id              String      @id @default(uuid()) @db.Uuid
+  userId          String      @db.Uuid
+  tournamentId    String      @db.Uuid
+  status          EntryStatus @default(CONFIRMED)
+  checkedInAt     DateTime?
+  paidAt          DateTime?
+  paymentIntentId String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tournament      Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tournamentId])
+}
+
+model Match {
+  id            String   @id @default(uuid()) @db.Uuid
+  tournamentId  String   @db.Uuid
+  round         Int
+  player1Id     String   @db.Uuid
+  player2Id     String?  @db.Uuid
+  status        String
+  result        String?
+  lichessGameId String?
+  ratings       Json?
+  scheduledAt   DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  antiCheatCases AntiCheatCase[]
+
+  @@unique([tournamentId, round, player1Id, player2Id])
+  @@index([tournamentId, round])
+}
+
+model PrizePoolLedger {
+  id              String          @id @default(uuid()) @db.Uuid
+  tournamentId    String          @db.Uuid
+  type            LedgerEntryType
+  amount          Decimal         @db.Decimal(12, 2)
+  description     String
+  relatedUserId   String?         @db.Uuid
+  relatedPayoutId String?
+  balance         Decimal         @db.Decimal(12, 2)
+  createdAt       DateTime        @default(now())
+
+  tournament      Tournament      @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@index([tournamentId, createdAt])
+}
+
+model Payout {
+  id             String       @id @default(uuid()) @db.Uuid
+  userId         String       @db.Uuid
+  tournamentId   String       @db.Uuid
+  amount         Decimal      @db.Decimal(12, 2)
+  status         PayoutStatus @default(PENDING)
+  stripePayoutId String?
+  antiCheatHold  Boolean      @default(false)
+  antiCheatCaseId String?
+  kycVerifiedAt  DateTime?
+  processedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tournament     Tournament   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@index([userId, tournamentId])
+}
+
+model SupportTicket {
+  id           String              @id @default(uuid()) @db.Uuid
+  userId       String              @db.Uuid
+  tournamentId String?             @db.Uuid
+  subject      String
+  description  String
+  status       SupportTicketStatus @default(OPEN)
+  adminNotes   String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tournament   Tournament?         @relation(fields: [tournamentId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model AntiCheatCase {
+  id           String              @id @default(uuid()) @db.Uuid
+  userId       String              @db.Uuid
+  tournamentId String              @db.Uuid
+  matchId      String?             @db.Uuid
+  status       AntiCheatCaseStatus @default(SOFT_FLAG)
+  riskLevel    AntiCheatRiskLevel  @default(LOW)
+  evidence     String
+  appealText   String?
+  adminNotes   String?
+  resolvedBy   String?             @db.Uuid
+  resolvedAt   DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tournament   Tournament          @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  match        Match?              @relation(fields: [matchId], references: [id])
+}
+
+model CasualPlayer {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String?  @db.Uuid
+  guestKey    String?  @unique
+  displayName String
+  rating      Int      @default(1200)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  queueEntries CasualQueueEntry[]
+  whiteMatches CasualMatch[] @relation("CasualWhite")
+  blackMatches CasualMatch[] @relation("CasualBlack")
+  masterySkills MasteryPlayerSkill[]
+  masteryEvents MasteryGameEvent[]
+  masteryFeedback MasteryFeedback[]
+
+  @@unique([userId])
+  @@index([rating])
+}
+
+model CasualQueueEntry {
+  id             String           @id @default(uuid()) @db.Uuid
+  playerId       String           @db.Uuid
+  status         CasualQueueStatus @default(QUEUED)
+  ratingSnapshot Int
+  timeControl    String           @default("3+0")
+  queuedAt       DateTime         @default(now())
+  matchedAt      DateTime?
+  matchId        String?          @db.Uuid
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  player         CasualPlayer     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  match          CasualMatch?     @relation(fields: [matchId], references: [id], onDelete: SetNull)
+
+  @@index([status, timeControl, queuedAt])
+  @@index([playerId])
+}
+
+model CasualMatch {
+  id               String           @id @default(uuid()) @db.Uuid
+  playerWhiteId    String           @db.Uuid
+  playerBlackId    String           @db.Uuid
+  status           CasualMatchStatus @default(IN_PROGRESS)
+  result           CasualMatchResult?
+  drawOfferedById  String?          @db.Uuid
+  drawOfferedAt    DateTime?
+  takebackOfferedById String?       @db.Uuid
+  takebackOfferedAt   DateTime?
+  timeControl      String           @default("3+3")
+  startedAt        DateTime         @default(now())
+  completedAt      DateTime?
+  masteryEvaluatedAt DateTime?
+  ratingChangeWhite Int?
+  ratingChangeBlack Int?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  playerWhite      CasualPlayer     @relation("CasualWhite", fields: [playerWhiteId], references: [id], onDelete: Cascade)
+  playerBlack      CasualPlayer     @relation("CasualBlack", fields: [playerBlackId], references: [id], onDelete: Cascade)
+  moves            CasualMove[]
+  queueEntries     CasualQueueEntry[]
+  masteryEvents    MasteryGameEvent[]
+  masteryFeedback  MasteryFeedback[]
+
+  @@index([status, startedAt])
+}
+
+model CasualMove {
+  id        String   @id @default(uuid()) @db.Uuid
+  matchId   String   @db.Uuid
+  ply       Int
+  san       String
+  uci       String
+  fen       String
+  createdAt DateTime @default(now())
+
+  match     CasualMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, ply])
+  @@index([matchId])
+}
+
+model MasteryCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique
+  name        String
+  description String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  skills      MasterySkill[]
+}
+
+model MasterySkill {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique
+  categoryId  String   @db.Uuid
+  name        String
+  description String?
+  maxLevel    Int      @default(10)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    MasteryCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  playerSkills MasteryPlayerSkill[]
+  events      MasteryGameEvent[]
+}
+
+model MasteryPlayerSkill {
+  id          String   @id @default(uuid()) @db.Uuid
+  playerId    String   @db.Uuid
+  skillId     String   @db.Uuid
+  xp          Int      @default(0)
+  level       Int      @default(0)
+  lastLeveledAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  player      CasualPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  skill       MasterySkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, skillId])
+  @@index([playerId])
+}
+
+model MasteryGameEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  matchId   String   @db.Uuid
+  playerId  String   @db.Uuid
+  skillId   String   @db.Uuid
+  deltaXp   Int
+  notes     String?
+  createdAt DateTime @default(now())
+
+  match     CasualMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player    CasualPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  skill     MasterySkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@index([matchId, playerId])
+  @@index([playerId])
+}
+
+model MasteryFeedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  matchId   String   @db.Uuid
+  playerId  String   @db.Uuid
+  summary   String
+  strengths Json
+  weaknesses Json
+  recommendations Json
+  createdAt DateTime @default(now())
+
+  match     CasualMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player    CasualPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([matchId, playerId])
+  @@index([playerId])
+}
