@@ -57,6 +57,24 @@ export default async function AdminPage() {
               Stats
             </Link>
             <Link
+              href="/admin/audit-logs"
+              className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-300"
+            >
+              Audit logs
+            </Link>
+            <Link
+              href="/admin/health"
+              className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-300"
+            >
+              Health
+            </Link>
+            <Link
+              href="/admin/queues"
+              className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-300"
+            >
+              Queues
+            </Link>
+            <Link
               href="/admin/sponsors"
               className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-300"
             >
@@ -67,6 +85,12 @@ export default async function AdminPage() {
               className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-300"
             >
               Affiliates
+            </Link>
+            <Link
+              href="/admin/announcements"
+              className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-300"
+            >
+              Announcements
             </Link>
             <Link
               href="/admin/demo-tournament"

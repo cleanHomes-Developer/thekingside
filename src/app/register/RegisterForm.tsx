@@ -15,6 +15,7 @@ export default function RegisterForm() {
   const router = useRouter();
   const [form, setForm] = useState(initialState);
   const [error, setError] = useState<string | null>(null);
+  const [retryAfter, setRetryAfter] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -31,6 +32,8 @@ export default function RegisterForm() {
 
       if (!response.ok) {
         const data = await response.json().catch(() => null);
+        const retry = response.headers.get("Retry-After");
+        setRetryAfter(retry ? Number(retry) : null);
         setError(data?.error ?? "Registration failed");
         return;
       }
@@ -127,6 +130,7 @@ export default function RegisterForm() {
       {error ? (
         <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
           {error}
+          {retryAfter ? ` (Retry in ${retryAfter}s)` : ""}
         </p>
       ) : null}
 
@@ -138,6 +142,9 @@ export default function RegisterForm() {
         {submitting ? "Creating account..." : "Create account"}
       </button>
 
+      <p className="text-center text-xs text-white/60">
+        We will email a verification link after you register.
+      </p>
       <p className="text-center text-sm text-white/60">
         Already have an account?{" "}
         <Link className="text-cyan-300 hover:text-cyan-200" href="/login">
@@ -147,3 +154,4 @@ export default function RegisterForm() {
     </form>
   );
 }
+

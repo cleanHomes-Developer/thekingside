@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { prisma } from "@/lib/db";
+import CountdownBadge from "./tournaments/CountdownBadge";
 
 export const metadata: Metadata = {
   title: "Competitive Chess Tournaments",
@@ -48,7 +50,36 @@ const ticketHolders = [
   { name: "Fabiano Caruana", rating: "2804" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  let nextTournament: { startDate: Date } | null = null;
+  let statOverrides: Array<{ label: string; value: string }> | null = null;
+  try {
+    const [tournaments, usersCount, uniquePlayers, tournamentsCompleted] =
+      await Promise.all([
+        prisma.tournament.findMany({
+          orderBy: { startDate: "asc" },
+          select: { startDate: true },
+        }),
+        prisma.user.count(),
+        prisma.entry.findMany({
+          distinct: ["userId"],
+          select: { userId: true },
+        }),
+        prisma.tournament.count({ where: { status: "COMPLETED" } }),
+      ]);
+    nextTournament =
+      tournaments.find((tournament) => tournament.startDate > new Date()) ??
+      null;
+    statOverrides = [
+      { label: "Players registered", value: usersCount.toString() },
+      { label: "Unique players", value: uniquePlayers.length.toString() },
+      { label: "Days completed", value: `${tournamentsCompleted}/30` },
+    ];
+  } catch {
+    nextTournament = null;
+    statOverrides = null;
+  }
+  const stats = statOverrides ?? statCards;
   return (
     <div className="relative overflow-hidden">
       <section className="mx-auto w-full max-w-6xl px-6 pb-10 pt-16">
@@ -82,6 +113,14 @@ export default function HomePage() {
                 View tournaments
               </Link>
             </div>
+            {nextTournament ? (
+              <div className="pt-2">
+                <CountdownBadge
+                  target={nextTournament.startDate.toISOString()}
+                  label="Next event in"
+                />
+              </div>
+            ) : null}
           </div>
 
           <div className="panel-surface rounded-3xl border px-6 py-6 text-white/80">
@@ -115,7 +154,7 @@ export default function HomePage() {
 
       <section className="mx-auto w-full max-w-6xl px-6 pb-10">
         <div className="grid gap-4 md:grid-cols-3">
-          {statCards.map((stat) => (
+          {stats.map((stat) => (
             <div
               key={stat.label}
               className="panel-surface rounded-2xl border px-5 py-4"

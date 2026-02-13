@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/guards";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { assignLichessGames } from "@/lib/lichess/games";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
+import { prisma } from "@/lib/db";
 
 type RouteContext = {
   params: { id: string };
@@ -17,7 +19,18 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const requestMeta = getRequestMeta(request);
   const result = await assignLichessGames(params.id);
+
+  await logAuditEvent(prisma, {
+    action: "LICHESS_CREATE_GAMES",
+    userId: admin.id,
+    entityType: "Tournament",
+    entityId: params.id,
+    afterState: { created: result.created },
+    ipAddress: requestMeta.ipAddress,
+    userAgent: requestMeta.userAgent,
+  });
 
   return NextResponse.json({ created: result.created });
 }

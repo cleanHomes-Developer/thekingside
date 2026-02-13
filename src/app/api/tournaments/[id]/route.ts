@@ -10,6 +10,7 @@ import {
 import { enforceTournamentLock } from "@/lib/tournaments/lock";
 import { serializeTournament } from "@/lib/tournaments/serialize";
 import { getSeasonConfig } from "@/lib/season";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
 type RouteContext = {
   params: { id: string };
@@ -64,6 +65,8 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
       { status: 400 },
     );
   }
+
+  const requestMeta = getRequestMeta(request);
 
   const minPlayers = parsed.data.minPlayers ?? existing.minPlayers;
   const maxPlayers = parsed.data.maxPlayers ?? existing.maxPlayers;
@@ -127,6 +130,45 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     },
   });
 
+    await logAuditEvent(prisma, {
+      action: "TOURNAMENT_UPDATE",
+      userId: admin.id,
+      entityType: "Tournament",
+      entityId: tournament.id,
+      beforeState: {
+        name: existing.name,
+        type: existing.type,
+        status: existing.status,
+        entryFee: existing.entryFee?.toString?.() ?? existing.entryFee,
+        minPlayers: existing.minPlayers,
+        maxPlayers: existing.maxPlayers,
+        startDate: existing.startDate.toISOString(),
+        endDate: existing.endDate ? existing.endDate.toISOString() : null,
+        lockAt: existing.lockAt.toISOString(),
+        timeControl: existing.timeControl,
+        seriesKey: existing.seriesKey,
+        slotKey: existing.slotKey,
+        description: existing.description,
+      },
+      afterState: {
+        name: tournament.name,
+        type: tournament.type,
+        status: tournament.status,
+        entryFee: tournament.entryFee?.toString?.() ?? tournament.entryFee,
+        minPlayers: tournament.minPlayers,
+        maxPlayers: tournament.maxPlayers,
+        startDate: tournament.startDate.toISOString(),
+        endDate: tournament.endDate ? tournament.endDate.toISOString() : null,
+        lockAt: tournament.lockAt.toISOString(),
+        timeControl: tournament.timeControl,
+        seriesKey: tournament.seriesKey,
+        slotKey: tournament.slotKey,
+        description: tournament.description,
+      },
+    ipAddress: requestMeta.ipAddress,
+    userAgent: requestMeta.userAgent,
+  });
+
   return NextResponse.json({ tournament: serializeTournament(tournament) });
 }
 
@@ -148,7 +190,25 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await prisma.tournament.delete({ where: { id: params.id } });
+  const requestMeta = getRequestMeta(request);
+  await prisma.$transaction(async (tx) => {
+    await tx.tournament.delete({ where: { id: params.id } });
+    await logAuditEvent(tx, {
+      action: "TOURNAMENT_DELETE",
+      userId: admin.id,
+      entityType: "Tournament",
+      entityId: existing.id,
+      beforeState: {
+        name: existing.name,
+        type: existing.type,
+        status: existing.status,
+        startDate: existing.startDate.toISOString(),
+      },
+      afterState: null,
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
+  });
 
   return NextResponse.json({ ok: true });
 }

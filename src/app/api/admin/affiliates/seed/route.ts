@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guards";
 import { seedAffiliatePrograms } from "@/lib/affiliates/programs";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,6 +18,7 @@ export async function POST() {
     );
   }
 
+  const requestMeta = getRequestMeta(request);
   const created = await prisma.$transaction(async (tx) => {
     const records = await Promise.all(
       seedAffiliatePrograms.map((program, index) =>
@@ -35,6 +37,16 @@ export async function POST() {
         }),
       ),
     );
+    await logAuditEvent(tx, {
+      action: "AFFILIATE_SEED",
+      userId: admin.id,
+      entityType: "AffiliateProgram",
+      entityId: null,
+      beforeState: { count: 0 },
+      afterState: { count: records.length },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
     return records.length;
   });
 

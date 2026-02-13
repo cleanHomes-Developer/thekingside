@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guards";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { getSeasonConfig } from "@/lib/season";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 import { Prisma } from "@prisma/client";
 
 const sponsorSchema = z.object({
@@ -17,6 +18,32 @@ const sponsorSchema = z.object({
   startsAt: z.string().datetime().optional().nullable(),
   endsAt: z.string().datetime().optional().nullable(),
 });
+
+function serializeSponsor(sponsor: {
+  id: string;
+  name: string;
+  tier: string;
+  logoUrl: string;
+  websiteUrl: string | null;
+  tagline: string | null;
+  active: boolean;
+  sortOrder: number;
+  startsAt: Date | null;
+  endsAt: Date | null;
+}) {
+  return {
+    id: sponsor.id,
+    name: sponsor.name,
+    tier: sponsor.tier,
+    logoUrl: sponsor.logoUrl,
+    websiteUrl: sponsor.websiteUrl,
+    tagline: sponsor.tagline,
+    active: sponsor.active,
+    sortOrder: sponsor.sortOrder,
+    startsAt: sponsor.startsAt ? sponsor.startsAt.toISOString() : null,
+    endsAt: sponsor.endsAt ? sponsor.endsAt.toISOString() : null,
+  };
+}
 
 export async function GET() {
   const admin = await requireAdmin();
@@ -58,6 +85,7 @@ export async function POST(request: NextRequest) {
 
   const season = parsed.data.active ? await getSeasonConfig() : null;
   const SPONSOR_LIMIT_ERROR = "SPONSOR_LIMIT_REACHED";
+  const requestMeta = getRequestMeta(request);
 
   try {
     const sponsor = await prisma.$transaction(
@@ -71,7 +99,7 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        return tx.sponsor.create({
+        const created = await tx.sponsor.create({
           data: {
             name: parsed.data.name,
             tier: parsed.data.tier,
@@ -86,6 +114,19 @@ export async function POST(request: NextRequest) {
             endsAt: parsed.data.endsAt ? new Date(parsed.data.endsAt) : undefined,
           },
         });
+
+        await logAuditEvent(tx, {
+          action: "SPONSOR_CREATE",
+          userId: admin.id,
+          entityType: "Sponsor",
+          entityId: created.id,
+          beforeState: null,
+          afterState: serializeSponsor(created),
+          ipAddress: requestMeta.ipAddress,
+          userAgent: requestMeta.userAgent,
+        });
+
+        return created;
       },
       { isolationLevel: "Serializable" },
     );

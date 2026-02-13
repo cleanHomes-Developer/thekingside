@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { getSessionFromCookies } from "@/lib/auth/session";
@@ -6,6 +6,8 @@ import { calculateEloDelta } from "@/lib/play/ratings";
 import { buildMatchSnapshot } from "@/lib/play/match";
 import { publishPlayStream } from "@/lib/play/stream";
 import { evaluateMasteryForMatch } from "@/lib/mastery/evaluate";
+import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
+import { rateLimit } from "@/lib/rate-limit";
 
 const GUEST_COOKIE = "tks_guest";
 
@@ -30,7 +32,21 @@ async function getPlayerId() {
   return player?.id ?? null;
 }
 
-export async function POST(_request: Request, { params }: Params) {
+export async function POST(request: NextRequest, { params }: Params) {
+  if (!isRequestFromAllowedOrigin(request)) {
+    return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+  }
+  const limit = rateLimit(request, {
+    keyPrefix: "play:resign",
+    windowMs: 60_000,
+    max: 20,
+  });
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": limit.retryAfter.toString() } },
+    );
+  }
   const playerId = await getPlayerId();
   if (!playerId) {
     return NextResponse.json({ error: "Player not found" }, { status: 401 });

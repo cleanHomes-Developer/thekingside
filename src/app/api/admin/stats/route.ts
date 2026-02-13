@@ -29,10 +29,24 @@ export async function GET() {
     _sum: { amount: true },
   });
 
-  const adminProfit = await prisma.prizePoolLedger.aggregate({
-    _sum: { amount: true },
-    where: { type: "PLATFORM_FEE" },
-  });
+  const [platformFees, stripeFees] = await Promise.all([
+    prisma.prizePoolLedger.aggregate({
+      _sum: { amount: true },
+      where: { type: "PLATFORM_FEE" },
+    }),
+    prisma.prizePoolLedger.aggregate({
+      _sum: { amount: true },
+      where: { type: "STRIPE_FEE" },
+    }),
+  ]);
+
+  const platformFeeSum = platformFees._sum.amount
+    ? Number(platformFees._sum.amount)
+    : 0;
+  const stripeFeeSum = stripeFees._sum.amount
+    ? Number(stripeFees._sum.amount)
+    : 0;
+  const adminProfit = platformFeeSum + stripeFeeSum;
 
   return NextResponse.json({
     usersCount,
@@ -42,6 +56,6 @@ export async function GET() {
     payoutsPending,
     totalPrizePool: totalPrizePool._sum.prizePool ?? 0,
     totalLedger: totalLedger._sum.amount ?? 0,
-    adminProfit: adminProfit._sum.amount ?? 0,
+    adminProfit,
   });
 }

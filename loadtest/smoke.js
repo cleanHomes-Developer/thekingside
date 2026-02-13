@@ -183,7 +183,7 @@ async function run() {
 
   // Quick SSE sanity check
   try {
-    const res = await fetchWithCookies("/api/play/stream", { timeoutMs: 1500 });
+    const res = await fetchWithCookies("/api/play/stream", { timeoutMs: 5000 });
     if (res.status !== 200) {
       failed += 1;
       console.error(`FAIL /api/play/stream -> ${res.status}`);

@@ -81,7 +81,7 @@ export default async function AffiliatesPage() {
                         className="rounded-xl border border-white/10 bg-slate-950/40 p-4 text-sm text-white/70"
                       >
                         <p className="text-xs uppercase tracking-[0.2em] text-white/50">
-                          {program.commissionRange} · {program.cookieDuration}
+                          {program.commissionRange} | {program.cookieDuration}
                         </p>
                         <p className="mt-2 text-base font-semibold text-white">
                           {program.name}

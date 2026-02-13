@@ -12,6 +12,7 @@ import { enforceTournamentLocks } from "@/lib/tournaments/lock";
 import { serializeTournament } from "@/lib/tournaments/serialize";
 import { getSeasonConfig } from "@/lib/season";
 import { createLedgerEntries } from "@/lib/payments/ledger";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 import { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
   const season = await getSeasonConfig();
   const entryFee = season.mode === "free" ? 0 : parsed.data.entryFee;
   const seedPrizePool = season.mode === "free" ? season.freePrizePool : 0;
+  const requestMeta = getRequestMeta(request);
 
   const tournament = await prisma.$transaction(async (tx) => {
     const created = await tx.tournament.create({
@@ -89,16 +91,58 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    await tx.payoutSchedule.create({
+      data: {
+        tournamentId: created.id,
+        position: 1,
+        percent: new Prisma.Decimal(100),
+      },
+    });
+
     if (season.mode === "free" && seedPrizePool > 0) {
       await createLedgerEntries(tx, created.id, [
         {
-          type: "PLATFORM_FEE",
+          type: "SEED",
           amount: new Prisma.Decimal(seedPrizePool),
           description: `Free season prize seed`,
           relatedUserId: admin.id,
+          affectsBalance: true,
         },
       ]);
+
+      await logAuditEvent(tx, {
+        action: "PRIZE_POOL_SEED",
+        userId: admin.id,
+        entityType: "Tournament",
+        entityId: created.id,
+        beforeState: { prizePool: "0" },
+        afterState: { prizePool: seedPrizePool.toString() },
+        ipAddress: requestMeta.ipAddress,
+        userAgent: requestMeta.userAgent,
+      });
     }
+
+    await logAuditEvent(tx, {
+      action: "TOURNAMENT_CREATE",
+      userId: admin.id,
+      entityType: "Tournament",
+      entityId: created.id,
+      afterState: {
+        name: created.name,
+        type: created.type,
+        status: created.status,
+        entryFee: created.entryFee?.toString?.() ?? created.entryFee,
+        minPlayers: created.minPlayers,
+        maxPlayers: created.maxPlayers,
+        startDate: created.startDate.toISOString(),
+        lockAt: created.lockAt.toISOString(),
+        timeControl: created.timeControl,
+        seriesKey: created.seriesKey,
+        slotKey: created.slotKey,
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
 
     return created;
   });

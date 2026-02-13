@@ -73,7 +73,7 @@ export default function AdminSupportTable({ tickets }: AdminSupportTableProps) {
                   {ticket.subject}
                 </p>
                 <p className="text-xs text-white/40">
-                  {ticket.tournamentName ?? "General"} ·{" "}
+                  {ticket.tournamentName ?? "General"} |{" "}
                   {new Date(ticket.createdAt).toLocaleString()}
                 </p>
               </div>

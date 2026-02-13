@@ -5,6 +5,7 @@ import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { generateSwissRound } from "@/lib/tournaments/swiss";
 import { enforceTournamentLock } from "@/lib/tournaments/lock";
 import { assignLichessGames } from "@/lib/lichess/games";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
 type RouteContext = {
   params: { id: string };
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     [],
     1,
   );
+  const requestMeta = getRequestMeta(request);
 
   await prisma.$transaction(async (tx) => {
     await tx.match.deleteMany({ where: { tournamentId: tournament.id } });
@@ -80,6 +82,24 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         status: "IN_PROGRESS",
         currentPlayers: entries.length,
       },
+    });
+
+    await logAuditEvent(tx, {
+      action: "TOURNAMENT_GENERATE_BRACKET",
+      userId: admin.id,
+      entityType: "Tournament",
+      entityId: tournament.id,
+      beforeState: {
+        status: tournament.status,
+        currentPlayers: tournament.currentPlayers,
+      },
+      afterState: {
+        status: "IN_PROGRESS",
+        currentPlayers: entries.length,
+        matchesCreated: bracket.length,
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
     });
   });
 

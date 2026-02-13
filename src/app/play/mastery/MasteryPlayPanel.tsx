@@ -29,7 +29,7 @@ type MasteryOverview = {
   player: {
     id: string;
     displayName: string;
-    rating: number;
+    rating: number | null;
   };
   categories: MasteryCategory[];
   feedback: {
@@ -146,7 +146,9 @@ export default function MasteryPlayPanel() {
   useEffect(() => {
     let active = true;
     const load = async () => {
-      const res = await fetch("/api/mastery/overview");
+      const res = await fetch(
+        `/api/mastery/overview${showRating ? "?includeRating=1" : ""}`,
+      );
       if (!res.ok) {
         return;
       }
@@ -161,7 +163,7 @@ export default function MasteryPlayPanel() {
       active = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [showRating]);
 
   const summary = useMemo(() => {
     if (!overview?.feedback) {
@@ -237,7 +239,11 @@ export default function MasteryPlayPanel() {
                 onClick={() => setShowRating((prev) => !prev)}
                 className="rounded-full border border-cyan-300/30 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-cyan-100"
               >
-                {showRating ? `Rating ${overview.player.rating}` : "Reveal rating"}
+                {showRating
+                  ? overview.player.rating !== null
+                    ? `Rating ${overview.player.rating}`
+                    : "Loading rating"
+                  : "Reveal rating"}
               </button>
             </div>
           ) : null}
@@ -286,6 +292,11 @@ export default function MasteryPlayPanel() {
               {primaryFocus ? (
                 <p className="text-xs text-white/50">
                   Level {primaryFocus.level}
+                </p>
+              ) : null}
+              {primaryFocus ? (
+                <p className="mt-2 text-xs text-white/60">
+                  Recommended drill: {primaryFocus.name} fundamentals
                 </p>
               ) : null}
             </div>

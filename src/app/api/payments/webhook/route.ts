@@ -5,6 +5,7 @@ import {
   calculateEntryAllocation,
   createLedgerEntries,
 } from "@/lib/payments/ledger";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 import { Prisma } from "@prisma/client";
 import Stripe from "stripe";
 
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest) {
     const entryId = session.metadata?.entryId;
     const paymentIntentId = session.payment_intent?.toString() ?? null;
     if (entryId) {
+      const requestMeta = getRequestMeta(request);
       let stripeFee = new Prisma.Decimal(0);
       if (paymentIntentId) {
         const paymentIntent = await stripe.paymentIntents.retrieve(
@@ -58,6 +60,11 @@ export async function POST(request: NextRequest) {
         if (!entry || entry.status === "CONFIRMED") {
           return;
         }
+        const beforeState = {
+          status: entry.status,
+          paidAt: entry.paidAt,
+          paymentIntentId: entry.paymentIntentId,
+        };
 
         const allocation = calculateEntryAllocation(
           new Prisma.Decimal(entry.tournament.entryFee),
@@ -82,23 +89,44 @@ export async function POST(request: NextRequest) {
         await createLedgerEntries(tx, entry.tournamentId, [
           {
             type: "ENTRY_FEE",
-            amount: allocation.entryFee,
+            amount: allocation.prizeShare,
             description: `Entry fee received for ${entry.id}`,
             relatedUserId: entry.userId,
+            affectsBalance: true,
           },
           {
             type: "PLATFORM_FEE",
-            amount: allocation.platformShare.mul(-1),
+            amount: allocation.platformShare,
             description: `Platform fee for ${entry.id}`,
             relatedUserId: entry.userId,
+            affectsBalance: false,
           },
           {
             type: "STRIPE_FEE",
             amount: stripeFee.mul(-1),
             description: `Stripe fee for ${entry.id}`,
             relatedUserId: entry.userId,
+            affectsBalance: false,
           },
         ]);
+
+        await logAuditEvent(tx, {
+          action: "ENTRY_CONFIRMED",
+          userId: entry.userId,
+          entityType: "Entry",
+          entityId: entry.id,
+          beforeState,
+          afterState: {
+            status: "CONFIRMED",
+            paidAt: new Date().toISOString(),
+            paymentIntentId,
+            prizeShare: allocation.prizeShare.toString(),
+            platformShare: allocation.platformShare.toString(),
+            stripeFee: stripeFee.toString(),
+          },
+          ipAddress: requestMeta.ipAddress,
+          userAgent: requestMeta.userAgent,
+        });
       });
     }
   }
@@ -107,11 +135,13 @@ export async function POST(request: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
     const entryId = session.metadata?.entryId;
     if (entryId) {
+      const requestMeta = getRequestMeta(request);
       await prisma.$transaction(async (tx) => {
         const entry = await tx.entry.findUnique({ where: { id: entryId } });
         if (!entry || entry.status !== "PENDING") {
           return;
         }
+        const beforeState = { status: entry.status };
         await tx.entry.update({
           where: { id: entryId },
           data: { status: "CANCELLED" },
@@ -119,6 +149,17 @@ export async function POST(request: NextRequest) {
         await tx.tournament.update({
           where: { id: entry.tournamentId },
           data: { currentPlayers: { decrement: 1 } },
+        });
+
+        await logAuditEvent(tx, {
+          action: "ENTRY_EXPIRED",
+          userId: entry.userId,
+          entityType: "Entry",
+          entityId: entry.id,
+          beforeState,
+          afterState: { status: "CANCELLED" },
+          ipAddress: requestMeta.ipAddress,
+          userAgent: requestMeta.userAgent,
         });
       });
     }

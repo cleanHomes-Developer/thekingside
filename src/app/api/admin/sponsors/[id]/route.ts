@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guards";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { getSeasonConfig } from "@/lib/season";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 import { Prisma } from "@prisma/client";
 
 type RouteContext = {
@@ -21,6 +22,32 @@ const sponsorSchema = z.object({
   startsAt: z.string().datetime().optional().nullable(),
   endsAt: z.string().datetime().optional().nullable(),
 });
+
+function serializeSponsor(sponsor: {
+  id: string;
+  name: string;
+  tier: string;
+  logoUrl: string;
+  websiteUrl: string | null;
+  tagline: string | null;
+  active: boolean;
+  sortOrder: number;
+  startsAt: Date | null;
+  endsAt: Date | null;
+}) {
+  return {
+    id: sponsor.id,
+    name: sponsor.name,
+    tier: sponsor.tier,
+    logoUrl: sponsor.logoUrl,
+    websiteUrl: sponsor.websiteUrl,
+    tagline: sponsor.tagline,
+    active: sponsor.active,
+    sortOrder: sponsor.sortOrder,
+    startsAt: sponsor.startsAt ? sponsor.startsAt.toISOString() : null,
+    endsAt: sponsor.endsAt ? sponsor.endsAt.toISOString() : null,
+  };
+}
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
   if (!isRequestFromAllowedOrigin(request)) {
@@ -57,6 +84,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
   const shouldActivate = parsed.data.active && !existing.active;
   const season = shouldActivate ? await getSeasonConfig() : null;
   const SPONSOR_LIMIT_ERROR = "SPONSOR_LIMIT_REACHED";
+  const requestMeta = getRequestMeta(request);
 
   try {
     const sponsor = shouldActivate
@@ -71,7 +99,7 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
               }
             }
 
-            return tx.sponsor.update({
+            const updated = await tx.sponsor.update({
               where: { id: params.id },
               data: {
                 name: parsed.data.name,
@@ -87,24 +115,52 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
                 endsAt: parsed.data.endsAt ? new Date(parsed.data.endsAt) : null,
               },
             });
+
+            await logAuditEvent(tx, {
+              action: "SPONSOR_UPDATE",
+              userId: admin.id,
+              entityType: "Sponsor",
+              entityId: updated.id,
+              beforeState: serializeSponsor(existing),
+              afterState: serializeSponsor(updated),
+              ipAddress: requestMeta.ipAddress,
+              userAgent: requestMeta.userAgent,
+            });
+
+            return updated;
           },
           { isolationLevel: "Serializable" },
         )
-      : await prisma.sponsor.update({
-          where: { id: params.id },
-          data: {
-            name: parsed.data.name,
-            tier: parsed.data.tier,
-            logoUrl: parsed.data.logoUrl,
-            websiteUrl: parsed.data.websiteUrl ?? undefined,
-            tagline: parsed.data.tagline ?? undefined,
-            active: parsed.data.active,
-            sortOrder: parsed.data.sortOrder,
-            startsAt: parsed.data.startsAt
-              ? new Date(parsed.data.startsAt)
-              : null,
-            endsAt: parsed.data.endsAt ? new Date(parsed.data.endsAt) : null,
-          },
+      : await prisma.$transaction(async (tx) => {
+          const updated = await tx.sponsor.update({
+            where: { id: params.id },
+            data: {
+              name: parsed.data.name,
+              tier: parsed.data.tier,
+              logoUrl: parsed.data.logoUrl,
+              websiteUrl: parsed.data.websiteUrl ?? undefined,
+              tagline: parsed.data.tagline ?? undefined,
+              active: parsed.data.active,
+              sortOrder: parsed.data.sortOrder,
+              startsAt: parsed.data.startsAt
+                ? new Date(parsed.data.startsAt)
+                : null,
+              endsAt: parsed.data.endsAt ? new Date(parsed.data.endsAt) : null,
+            },
+          });
+
+          await logAuditEvent(tx, {
+            action: "SPONSOR_UPDATE",
+            userId: admin.id,
+            entityType: "Sponsor",
+            entityId: updated.id,
+            beforeState: serializeSponsor(existing),
+            afterState: serializeSponsor(updated),
+            ipAddress: requestMeta.ipAddress,
+            userAgent: requestMeta.userAgent,
+          });
+
+          return updated;
         });
 
     return NextResponse.json({ sponsor });
@@ -147,6 +203,20 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  await prisma.sponsor.delete({ where: { id: params.id } });
+  const requestMeta = getRequestMeta(request);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.sponsor.delete({ where: { id: params.id } });
+    await logAuditEvent(tx, {
+      action: "SPONSOR_DELETE",
+      userId: admin.id,
+      entityType: "Sponsor",
+      entityId: existing.id,
+      beforeState: serializeSponsor(existing),
+      afterState: null,
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
+  });
   return NextResponse.json({ ok: true });
 }

@@ -129,6 +129,7 @@ export default function UnifiedBoard({
   const [streamStatus, setStreamStatus] = useState<"connected" | "reconnecting">(
     "connected",
   );
+  const [usingPolling, setUsingPolling] = useState(false);
   const boardWrapRef = useRef<HTMLDivElement | null>(null);
   const [boardWidth, setBoardWidth] = useState(900);
   const [playerTimeControl, setPlayerTimeControl] = useState("3+2");
@@ -139,6 +140,22 @@ export default function UnifiedBoard({
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [fullMoves, setFullMoves] = useState<string[]>([]);
   const [showFullHistory, setShowFullHistory] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const stored = window.localStorage.getItem("tks-play-focus");
+    if (stored === "1") {
+      setFocusMode(true);
+    }
+  }, []);
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem("tks-play-focus", focusMode ? "1" : "0");
+  }, [focusMode]);
   const reconnectNow = () => {
     setStreamStatus("reconnecting");
     setSseVersion((prev) => prev + 1);
@@ -176,6 +193,10 @@ export default function UnifiedBoard({
       setNotice(null);
     }
   }, [match?.id, match?.moves.length]);
+
+  useEffect(() => {
+    setFocusMode(false);
+  }, [mode]);
 
   useEffect(() => {
     if (!match) {
@@ -303,20 +324,24 @@ export default function UnifiedBoard({
       const data = JSON.parse(event.data) as StatePayload;
       setState(data);
       setStreamStatus("connected");
+      setUsingPolling(false);
     };
 
     source.onerror = () => {
       setStreamStatus("reconnecting");
       source.close();
       if (!fallbackTimer) {
+        setUsingPolling(true);
         fallbackTimer = setInterval(async () => {
           try {
             const response = await fetch("/api/play/state");
             const data = (await response.json()) as StatePayload;
             setState(data);
             setStreamStatus("connected");
+            setUsingPolling(true);
           } catch {
             setStreamStatus("reconnecting");
+            setUsingPolling(true);
           }
         }, 2000);
       }
@@ -327,6 +352,7 @@ export default function UnifiedBoard({
       if (fallbackTimer) {
         clearInterval(fallbackTimer);
       }
+      setUsingPolling(false);
     };
   }, [mode]);
 
@@ -689,11 +715,12 @@ export default function UnifiedBoard({
     if (match.fen) {
       nextGame.load(match.fen);
     }
-    const moveResult = nextGame.move({
-      from: source,
-      to: target,
-      promotion: "q",
-    });
+    const piece = nextGame.get(source);
+    const isPromotion =
+      piece?.type === "p" && (target.endsWith("8") || target.endsWith("1"));
+    const moveResult = isPromotion
+      ? nextGame.move({ from: source, to: target, promotion: "q" })
+      : nextGame.move({ from: source, to: target });
     if (!moveResult) {
       return false;
     }
@@ -727,7 +754,11 @@ export default function UnifiedBoard({
       const response = await fetch(`/api/play/match/${match.id}/move`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ from: source, to: target, promotion: "q" }),
+        body: JSON.stringify({
+          from: source,
+          to: target,
+          promotion: isPromotion ? "q" : undefined,
+        }),
       });
       const data = (await response.json()) as {
         match?: MatchSnapshot;
@@ -979,11 +1010,17 @@ export default function UnifiedBoard({
   const applyEngineMove = (moveStr: string) => {
     pushHistory();
     const nextGame = new Chess(fenRef.current);
-    const moveResult = nextGame.move({
-      from: moveStr.slice(0, 2),
-      to: moveStr.slice(2, 4),
-      promotion: moveStr[4] ?? "q",
-    });
+    const promotion = moveStr.length > 4 ? moveStr[4] : undefined;
+    const moveResult = promotion
+      ? nextGame.move({
+          from: moveStr.slice(0, 2),
+          to: moveStr.slice(2, 4),
+          promotion,
+        })
+      : nextGame.move({
+          from: moveStr.slice(0, 2),
+          to: moveStr.slice(2, 4),
+        });
     if (!moveResult) {
       historyRef.current.pop();
       setHistoryCount(historyRef.current.length);
@@ -1055,11 +1092,18 @@ export default function UnifiedBoard({
       return false;
     }
     const nextGame = new Chess(game.fen());
-    const move = nextGame.move({
-      from: sourceSquare,
-      to: targetSquare,
-      promotion: "q",
-    });
+    let move = null;
+    try {
+      const piece = nextGame.get(sourceSquare);
+      const isPromotion =
+        piece?.type === "p" &&
+        (targetSquare.endsWith("8") || targetSquare.endsWith("1"));
+      move = isPromotion
+        ? nextGame.move({ from: sourceSquare, to: targetSquare, promotion: "q" })
+        : nextGame.move({ from: sourceSquare, to: targetSquare });
+    } catch {
+      return false;
+    }
     if (!move) {
       return false;
     }
@@ -1328,8 +1372,9 @@ export default function UnifiedBoard({
     variant === "mastery"
       ? "mt-8 grid gap-8 lg:grid-cols-[0.4fr_1.6fr]"
       : "mt-8 grid gap-6 lg:grid-cols-[0.5fr_1.5fr]";
-  const boardGridClass =
-    variant === "mastery"
+  const boardGridClass = focusMode
+    ? "mt-6 grid gap-6 lg:grid-cols-[1fr]"
+    : variant === "mastery"
       ? "mt-6 grid gap-6 lg:grid-cols-[1.6fr_0.4fr]"
       : "mt-6 grid gap-6 lg:grid-cols-[1.5fr_0.5fr]";
   const movePairs = useMemo(() => {
@@ -1343,14 +1388,27 @@ export default function UnifiedBoard({
     }
     return pairs;
   }, [activeMoves]);
-  const evalSeries = useMemo(
-    () => buildMaterialEvalSeries(activeMoves),
-    [activeMovesKey],
+  const activeMovesForEval =
+    mode === "player"
+      ? match?.moves.map((move) => move.uci || move.san) ?? []
+      : moveList;
+  const activeMovesEvalKey = useMemo(
+    () => activeMovesForEval.join("|"),
+    [activeMovesForEval],
   );
+  const evalData = useMemo(
+    () => buildMaterialEvalSeries(activeMovesForEval),
+    [activeMovesEvalKey],
+  );
+  const evalSeries = evalData.series;
   const analysisSummary = useMemo(
     () => summarizeMoveQuality(evalSeries),
     [evalSeries],
   );
+  const analysisIntegrityNote =
+    evalData.invalidMoves > 0
+      ? "Partial analysis. Some moves could not be parsed."
+      : null;
   const fullHistoryText = useMemo(() => formatMovesList(), [activeMovesKey]);
   const inlineHistoryText = useMemo(
     () => fullHistoryText.replace(/\s+/g, " ").trim(),
@@ -1406,7 +1464,7 @@ export default function UnifiedBoard({
         : formattedBotTime;
   return (
     <div className={outerGridClass}>
-      <div className="space-y-4 rounded-3xl border border-white/10 bg-[#0a111f]/80 p-6">
+      <div className="space-y-4 rounded-3xl border panel-surface p-6">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-cyan-200/70">
             Casual lobby
@@ -1458,7 +1516,7 @@ export default function UnifiedBoard({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#0c1628] p-4 text-sm text-white/70 min-h-[180px]">
+        <div className="rounded-2xl border panel-soft p-4 text-sm text-white/70 min-h-[180px]">
           <p className="text-xs uppercase tracking-[0.25em] text-white/40">
             Controls
           </p>
@@ -1471,6 +1529,11 @@ export default function UnifiedBoard({
                   : "Select a time control and press Play now to queue."
               : "Configure time control and bot strength, then start a new game."}
           </p>
+          {mode === "player" && !queue && !match ? (
+            <p className="mt-2 text-xs text-white/50">
+              New here? Start with Blitz 3+2 for a balanced pace.
+            </p>
+          ) : null}
           <div className="mt-4 flex flex-wrap gap-3">
             <div className="flex flex-wrap gap-3">
               <div className="flex flex-wrap items-center gap-3 text-xs text-white/70">
@@ -1630,7 +1693,7 @@ export default function UnifiedBoard({
           )}
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#0c1628] p-4 text-sm text-white/70 min-h-[120px]">
+        <div className="rounded-2xl border panel-soft p-4 text-sm text-white/70 min-h-[120px]">
           <p className="text-xs uppercase tracking-[0.25em] text-white/40">
             Details
           </p>
@@ -1673,7 +1736,7 @@ export default function UnifiedBoard({
         )}
       </div>
 
-      <div className="rounded-3xl border border-white/10 bg-[#0a111f]/80 p-6">
+      <div className="rounded-3xl border panel-surface p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/70">
@@ -1697,7 +1760,11 @@ export default function UnifiedBoard({
                   <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/40">
                     <span>
                       Live feed:{" "}
-                      {streamStatus === "connected" ? "Connected" : "Reconnecting"}
+                      {streamStatus === "connected"
+                        ? usingPolling
+                          ? "Polling"
+                          : "Connected"
+                        : "Reconnecting"}
                     </span>
                     {streamStatus === "reconnecting" ? (
                       <button
@@ -1723,7 +1790,11 @@ export default function UnifiedBoard({
                   <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/40">
                     <span>
                       Live feed:{" "}
-                      {streamStatus === "connected" ? "Connected" : "Reconnecting"}
+                      {streamStatus === "connected"
+                        ? usingPolling
+                          ? "Polling"
+                          : "Connected"
+                        : "Reconnecting"}
                     </span>
                     {streamStatus === "reconnecting" ? (
                       <button
@@ -1749,18 +1820,32 @@ export default function UnifiedBoard({
               </div>
             )}
           </div>
-          <div className="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-100">
-            {mode === "player"
-              ? match
-                ? match.status === "COMPLETED"
-                  ? `Result: ${match.result ?? "?"}`
-                  : isYourTurn
-                    ? "Your move"
-                    : "Waiting"
-                : "Idle"
-              : timeoutWinner
-                ? `${timeoutWinner === "w" ? "White" : "Black"} wins on time`
-                : status}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-100">
+              {mode === "player"
+                ? match
+                  ? match.status === "COMPLETED"
+                    ? `Result: ${match.result ?? "?"}`
+                    : isYourTurn
+                      ? "Your move"
+                      : "Waiting"
+                  : "Idle"
+                : timeoutWinner
+                  ? `${timeoutWinner === "w" ? "White" : "Black"} wins on time`
+                  : status}
+            </div>
+            <button
+              type="button"
+              onClick={() => setFocusMode((prev) => !prev)}
+              title="Hide analysis panels and focus on the board."
+              className={`rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.2em] ${
+                focusMode
+                  ? "border-cyan-300/60 text-cyan-100"
+                  : "border-white/15 text-white/60"
+              }`}
+            >
+              {focusMode ? "Exit focus" : "Focus mode"}
+            </button>
           </div>
         </div>
         {notice ? (
@@ -1772,10 +1857,10 @@ export default function UnifiedBoard({
         <div className={boardGridClass}>
           <div
             ref={boardWrapRef}
-            className="relative rounded-2xl border border-white/10 bg-[#0b1426] p-4"
+            className="relative rounded-2xl border panel-surface p-4"
             style={{ margin: "0 auto", maxWidth: `${maxBoardWidth}px` }}
           >
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#0c1628] px-3 py-2 text-xs text-white/70">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border panel-soft px-3 py-2 text-xs text-white/70">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">
                   {whiteClockLabel}
@@ -1926,11 +2011,12 @@ export default function UnifiedBoard({
             </p>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-white/10 bg-[#0b1426] p-4 text-base text-white/70">
+          {!focusMode ? (
+            <div className="space-y-4 rounded-2xl border panel-surface p-4 text-base text-white/70">
             <p className="text-base uppercase tracking-[0.25em] text-white/40">
               Moves
             </p>
-            <div className="rounded-xl border border-white/10 bg-[#0c1628] p-3 text-base text-white/70">
+            <div className="rounded-xl border panel-soft p-3 text-base text-white/70">
               <div className="flex items-center justify-between">
                 <span>Stockfish</span>
                 <span className="text-sm uppercase tracking-[0.2em] text-white/60">
@@ -1974,7 +2060,7 @@ export default function UnifiedBoard({
                 {movePairs.slice(-6).map((pair) => (
                   <div
                     key={`pair-${pair.no}`}
-                    className="grid grid-cols-[48px_1fr_1fr] items-center gap-2 rounded-lg border border-white/10 bg-[#0c1628] px-2 py-1"
+                    className="grid grid-cols-[48px_1fr_1fr] items-center gap-2 rounded-lg border panel-soft px-2 py-1"
                   >
                     <span className="text-white/50">{pair.no}.</span>
                     <span className="font-mono text-cyan-200">
@@ -1994,7 +2080,7 @@ export default function UnifiedBoard({
             ) : (
               <p className="text-base text-white/50">Moves will appear here.</p>
             )}
-            <div className="rounded-xl border border-white/10 bg-[#0c1628] p-3 text-xs text-white/70">
+            <div className="rounded-xl border panel-soft p-3 text-xs text-white/70">
               <div className="flex items-center justify-between">
                 <span>History</span>
                 <div className="flex items-center gap-2">
@@ -2026,7 +2112,7 @@ export default function UnifiedBoard({
             </div>
             {(mode === "player" && match?.status === "COMPLETED") ||
             (mode === "bot" && (game.isGameOver() || timeoutWinner)) ? (
-              <div className="rounded-xl border border-white/10 bg-[#0c1628] p-3 text-xs text-white/70">
+              <div className="rounded-xl border panel-soft p-3 text-xs text-white/70">
                 <div className="flex items-center justify-between">
                   <span>Analysis report</span>
                   <button
@@ -2052,6 +2138,11 @@ export default function UnifiedBoard({
                       <span className="text-yellow-300">{analysisSummary.inaccuracies}</span>
                     </div>
                   </div>
+                ) : null}
+                {analysisIntegrityNote ? (
+                  <p className="mt-2 text-[11px] text-white/50">
+                    {analysisIntegrityNote}
+                  </p>
                 ) : null}
                 {evalSeries.length > 1 ? (
                   <div className="mt-3 rounded-lg border border-white/10 bg-slate-950/40 p-2">
@@ -2089,7 +2180,8 @@ export default function UnifiedBoard({
                 ) : null}
               </div>
             ) : null}
-          </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
@@ -2190,17 +2282,39 @@ function materialEval(game: Chess) {
   return score;
 }
 
+const UCI_PATTERN = /^[a-h][1-8][a-h][1-8][qrbn]?$/;
+
+function applyMoveString(game: Chess, move: string) {
+  if (UCI_PATTERN.test(move)) {
+    const from = move.slice(0, 2);
+    const to = move.slice(2, 4);
+    const promotion = move[4] ?? undefined;
+    try {
+      return game.move({ from, to, promotion });
+    } catch {
+      return null;
+    }
+  }
+  try {
+    return game.move(move, { sloppy: true });
+  } catch {
+    return null;
+  }
+}
+
 function buildMaterialEvalSeries(moves: string[]) {
   const game = new Chess();
   const series: number[] = [materialEval(game)];
+  let invalidMoves = 0;
   for (const move of moves) {
-    const result = game.move(move, { sloppy: true });
+    const result = applyMoveString(game, move);
     if (!result) {
+      invalidMoves += 1;
       break;
     }
     series.push(materialEval(game));
   }
-  return series;
+  return { series, invalidMoves };
 }
 
 function summarizeMoveQuality(series: number[]) {
@@ -2257,3 +2371,4 @@ function Sparkline({ series }: { series: number[] }) {
     </svg>
   );
 }
+

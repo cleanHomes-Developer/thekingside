@@ -11,6 +11,7 @@ import {
 } from "@/lib/payments/ledger";
 import { Prisma } from "@prisma/client";
 import { getSeasonConfig } from "@/lib/season";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
 type RouteContext = {
   params: { id: string };
@@ -175,23 +176,42 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       await createLedgerEntries(tx, result.tournament.id, [
         {
           type: "ENTRY_FEE",
-          amount: allocation.entryFee,
+          amount: allocation.prizeShare,
           description: `Entry fee received for ${entry.id}`,
           relatedUserId: entry.userId,
+          affectsBalance: true,
         },
         {
           type: "PLATFORM_FEE",
-          amount: allocation.platformShare.mul(-1),
+          amount: allocation.platformShare,
           description: `Platform fee for ${entry.id}`,
           relatedUserId: entry.userId,
+          affectsBalance: false,
         },
         {
           type: "STRIPE_FEE",
           amount: new Prisma.Decimal(0),
           description: `Stripe fee for ${entry.id}`,
           relatedUserId: entry.userId,
+          affectsBalance: false,
         },
       ]);
+
+      const requestMeta = getRequestMeta(request);
+      await logAuditEvent(tx, {
+        action: "ENTRY_CONFIRMED",
+        userId: entry.userId,
+        entityType: "Entry",
+        entityId: entry.id,
+        beforeState: { status: "PENDING" },
+        afterState: {
+          status: "CONFIRMED",
+          paymentIntentId: `dev-${entry.id}`,
+          prizeShare: allocation.prizeShare.toString(),
+        },
+        ipAddress: requestMeta.ipAddress,
+        userAgent: requestMeta.userAgent,
+      });
 
       return entry;
     });

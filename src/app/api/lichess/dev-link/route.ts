@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth/guards";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { getLichessConfig } from "@/lib/lichess/client";
+import { encryptToken } from "@/lib/security/tokens";
 
 export async function POST(request: NextRequest) {
   if (!isRequestFromAllowedOrigin(request)) {
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
   await prisma.profile.update({
     where: { userId: user.id },
     data: {
-      lichessAccessToken: "dev-token",
+      lichessAccessToken: encryptToken("dev-token"),
       lichessTokenCreatedAt: new Date(),
       lichessLinkedAt: new Date(),
     },

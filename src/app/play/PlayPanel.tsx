@@ -46,7 +46,9 @@ export default function PlayPanel() {
         </div>
       </div>
       <div className="mt-8">
-        <UnifiedBoard mode={mode} />
+        <div key={mode} className="animate-fade-in">
+          <UnifiedBoard mode={mode} />
+        </div>
       </div>
     </div>
   );

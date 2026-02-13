@@ -88,10 +88,19 @@ export default async function AdminStatsPage() {
     _sum: { amount: true },
   });
 
-  const adminProfit = await prisma.prizePoolLedger.aggregate({
-    _sum: { amount: true },
-    where: { type: "PLATFORM_FEE" },
-  });
+  const [platformFees, stripeFees] = await Promise.all([
+    prisma.prizePoolLedger.aggregate({
+      _sum: { amount: true },
+      where: { type: "PLATFORM_FEE" },
+    }),
+    prisma.prizePoolLedger.aggregate({
+      _sum: { amount: true },
+      where: { type: "STRIPE_FEE" },
+    }),
+  ]);
+  const adminProfit =
+    (platformFees._sum.amount ? Number(platformFees._sum.amount) : 0) +
+    (stripeFees._sum.amount ? Number(stripeFees._sum.amount) : 0);
 
   const entryRevenue = await prisma.prizePoolLedger.findMany({
     where: { type: "ENTRY_FEE" },
@@ -176,9 +185,7 @@ export default async function AdminStatsPage() {
               </p>
               <div className="mt-3 space-y-2 text-sm text-white/70">
                 <p>
-                  Admin profit: {formatCurrency(
-                    adminProfit._sum.amount?.toString() ?? "0",
-                  )}
+                  Admin profit: {formatCurrency(adminProfit.toString())}
                 </p>
                 <p>
                   Prize escrow: {formatCurrency(

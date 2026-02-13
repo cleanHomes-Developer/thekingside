@@ -4,10 +4,26 @@ import { verifyPassword } from "@/lib/auth/password";
 import { createSessionToken, setSessionCookie } from "@/lib/auth/session";
 import { loginSchema, normalizeEmail } from "@/lib/auth/validation";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   if (!isRequestFromAllowedOrigin(request)) {
     return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+  }
+
+  const limit = rateLimit(request, {
+    keyPrefix: "auth:login",
+    windowMs: 60_000,
+    max: 8,
+  });
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: { "Retry-After": limit.retryAfter.toString() },
+      },
+    );
   }
 
   let payload: unknown;

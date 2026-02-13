@@ -24,6 +24,7 @@ export async function GET() {
       name: user.name,
       displayName: user.displayName,
       role: user.role,
+      emailVerifiedAt: user.emailVerifiedAt,
       profile: user.profile,
     },
   });

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { getSessionFromCookies } from "@/lib/auth/session";
@@ -19,8 +19,10 @@ async function getPlayer() {
   return prisma.casualPlayer.findUnique({ where: { guestKey } });
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   await ensureMasterySeeded();
+  const includeRating =
+    request.nextUrl.searchParams.get("includeRating") === "1";
   const player = await getPlayer();
   if (!player) {
     return NextResponse.json({ error: "Player not found" }, { status: 401 });
@@ -84,7 +86,7 @@ export async function GET() {
     player: {
       id: player.id,
       displayName: player.displayName,
-      rating: player.rating,
+      rating: includeRating ? player.rating : null,
     },
     categories: grouped,
     feedback: feedback

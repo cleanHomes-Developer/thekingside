@@ -5,6 +5,8 @@ import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { fetchLichessGame } from "@/lib/lichess/client";
 import { mapLichessResult } from "@/lib/lichess/results";
 import { maybeAdvanceSwissRound } from "@/lib/tournaments/advance";
+import { decryptToken } from "@/lib/security/tokens";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
 type RouteContext = {
   params: { id: string };
@@ -20,6 +22,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const requestMeta = getRequestMeta(request);
   const matches = await prisma.match.findMany({
     where: {
       tournamentId: params.id,
@@ -50,7 +53,9 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     const player1Profile = await prisma.profile.findUnique({
       where: { userId: match.player1Id },
     });
-    const accessToken = player1Profile?.lichessAccessToken;
+    const accessToken = player1Profile?.lichessAccessToken
+      ? decryptToken(player1Profile.lichessAccessToken)
+      : null;
     if (!accessToken) {
       continue;
     }
@@ -73,6 +78,16 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   }
 
   await maybeAdvanceSwissRound(params.id);
+
+  await logAuditEvent(prisma, {
+    action: "LICHESS_SYNC_RESULTS",
+    userId: admin.id,
+    entityType: "Tournament",
+    entityId: params.id,
+    afterState: { updated: updated.length },
+    ipAddress: requestMeta.ipAddress,
+    userAgent: requestMeta.userAgent,
+  });
 
   return NextResponse.json({ updated: updated.length });
 }

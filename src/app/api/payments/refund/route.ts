@@ -8,6 +8,7 @@ import {
   calculateEntryAllocation,
   createLedgerEntries,
 } from "@/lib/payments/ledger";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 import { Prisma } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
@@ -60,11 +61,17 @@ export async function POST(request: NextRequest) {
     await stripe.refunds.create({ payment_intent: entry.paymentIntentId });
   }
 
+  const requestMeta = getRequestMeta(request);
   await prisma.$transaction(async (tx) => {
     const allocation = calculateEntryAllocation(
       new Prisma.Decimal(entry.tournament.entryFee),
     );
 
+    const beforeState = {
+      status: entry.status,
+      paidAt: entry.paidAt,
+      paymentIntentId: entry.paymentIntentId,
+    };
     await tx.entry.update({
       where: { id: entry.id },
       data: { status: "CANCELLED" },
@@ -80,11 +87,27 @@ export async function POST(request: NextRequest) {
     await createLedgerEntries(tx, entry.tournamentId, [
       {
         type: "REFUND",
-        amount: allocation.entryFee.mul(-1),
+        amount: allocation.prizeShare.mul(-1),
         description: `Refund issued for ${entry.id}`,
         relatedUserId: entry.userId,
+        affectsBalance: true,
       },
     ]);
+
+    await logAuditEvent(tx, {
+      action: "ENTRY_REFUND",
+      userId: entry.userId,
+      entityType: "Entry",
+      entityId: entry.id,
+      beforeState,
+      afterState: {
+        status: "CANCELLED",
+        refundedAt: new Date().toISOString(),
+        prizeShare: allocation.prizeShare.toString(),
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
   });
 
   return NextResponse.json({ ok: true });

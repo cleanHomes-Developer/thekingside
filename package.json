@@ -10,17 +10,24 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "worker:announcements": "node scripts/announcements-worker.mjs",
+    "e2e:admin": "node loadtest/e2e-admin.js"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
+    "@sendgrid/mail": "^8.1.6",
+    "@sentry/nextjs": "^10.38.0",
     "bcryptjs": "^2.4.3",
+    "bullmq": "^5.68.0",
+    "chess.js": "^1.0.0",
+    "ioredis": "^5.9.2",
     "jose": "^5.9.6",
     "next": "14.2.22",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "chess.js": "^1.0.0",
     "react-chessboard": "^4.6.0",
+    "react-dom": "18.3.1",
+    "redis": "^4.7.0",
     "stockfish": "^16.0.0",
     "stripe": "^14.25.0",
     "zod": "^3.24.2"

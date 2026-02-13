@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth/guards";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { validateSupportPayload } from "@/lib/support/validation";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
 export async function POST(request: NextRequest) {
   if (!isRequestFromAllowedOrigin(request)) {
@@ -32,13 +33,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
-  const ticket = await prisma.supportTicket.create({
-    data: {
+  const requestMeta = getRequestMeta(request);
+  const ticket = await prisma.$transaction(async (tx) => {
+    const created = await tx.supportTicket.create({
+      data: {
+        userId: user.id,
+        tournamentId: tournamentId ?? null,
+        subject,
+        description,
+      },
+    });
+
+    await logAuditEvent(tx, {
+      action: "SUPPORT_TICKET_CREATE",
       userId: user.id,
-      tournamentId: tournamentId ?? null,
-      subject,
-      description,
-    },
+      entityType: "SupportTicket",
+      entityId: created.id,
+      afterState: {
+        tournamentId: created.tournamentId,
+        subject: created.subject,
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
+
+    return created;
   });
 
   return NextResponse.json({ ticketId: ticket.id }, { status: 201 });

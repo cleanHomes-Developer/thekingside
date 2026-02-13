@@ -87,7 +87,7 @@ export default async function AdminSponsorsPage() {
                         {sponsor.name}
                       </p>
                       <p className="text-white/50">
-                        {sponsor.active ? "Active" : "Inactive"} · Order{" "}
+                        {sponsor.active ? "Active" : "Inactive"} | Order{" "}
                         {sponsor.sortOrder}
                       </p>
                     </div>

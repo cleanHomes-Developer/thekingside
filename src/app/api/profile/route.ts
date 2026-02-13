@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getSessionFromCookies } from "@/lib/auth/session";
 import { profileSchema } from "@/lib/auth/validation";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
 function normalizeProfilePayload(payload: Record<string, unknown>) {
   const normalized = { ...payload } as Record<string, unknown>;
@@ -83,15 +84,25 @@ export async function PUT(request: NextRequest) {
   }
 
   const { name, displayName, ...profileData } = parsed.data;
-  const [updatedUser] = await prisma.$transaction([
-    prisma.user.update({
+  const requestMeta = getRequestMeta(request);
+  const updatedUser = await prisma.$transaction(async (tx) => {
+    const beforeUser = await tx.user.findUnique({
+      where: { id: session.sub },
+      include: { profile: true },
+    });
+    if (!beforeUser) {
+      return null;
+    }
+
+    const user = await tx.user.update({
       where: { id: session.sub },
       data: {
         ...(name ? { name } : {}),
         ...(displayName ? { displayName } : {}),
       },
-    }),
-    prisma.profile.upsert({
+    });
+
+    const profile = await tx.profile.upsert({
       where: { userId: session.sub },
       create: {
         userId: session.sub,
@@ -100,8 +111,47 @@ export async function PUT(request: NextRequest) {
       update: {
         ...profileData,
       },
-    }),
-  ]);
+    });
+
+    await logAuditEvent(tx, {
+      action: "PROFILE_UPDATE",
+      userId: session.sub,
+      entityType: "UserProfile",
+      entityId: session.sub,
+      beforeState: {
+        name: beforeUser.name,
+        displayName: beforeUser.displayName,
+        profile: beforeUser.profile
+          ? {
+              country: beforeUser.profile.country,
+              lichessUsername: beforeUser.profile.lichessUsername,
+              profilePictureUrl: beforeUser.profile.profilePictureUrl,
+              bio: beforeUser.profile.bio,
+              age: beforeUser.profile.age,
+            }
+          : null,
+      },
+      afterState: {
+        name: user.name,
+        displayName: user.displayName,
+        profile: {
+          country: profile.country,
+          lichessUsername: profile.lichessUsername,
+          profilePictureUrl: profile.profilePictureUrl,
+          bio: profile.bio,
+          age: profile.age,
+        },
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
+
+    return user;
+  });
+
+  if (!updatedUser) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   return NextResponse.json({
     user: {

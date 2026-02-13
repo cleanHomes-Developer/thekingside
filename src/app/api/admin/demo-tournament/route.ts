@@ -5,6 +5,7 @@ import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { computeLockAt } from "@/lib/tournaments/validation";
 import { generateSwissRound, getSwissRounds } from "@/lib/tournaments/swiss";
 import { EntryStatus } from "@prisma/client";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
 function randomResult() {
   const roll = Math.random();
@@ -35,6 +36,7 @@ export async function POST(request: NextRequest) {
   const startDate = new Date(now.getTime() + 5 * 60 * 1000);
   const lockAt = computeLockAt(startDate);
   const playerCount = 16;
+  const requestMeta = getRequestMeta(request);
 
   const tournament = await prisma.$transaction(async (tx) => {
     const created = await tx.tournament.create({
@@ -52,6 +54,14 @@ export async function POST(request: NextRequest) {
         timeControl: "5+5",
         description: "Auto-simulated Swiss tournament.",
         createdBy: admin.id,
+      },
+    });
+
+    await tx.payoutSchedule.create({
+      data: {
+        tournamentId: created.id,
+        position: 1,
+        percent: 100,
       },
     });
 
@@ -91,6 +101,20 @@ export async function POST(request: NextRequest) {
         paidAt: now,
         paymentIntentId: `demo-${created.id}-${user.id}`,
       })),
+    });
+
+    await logAuditEvent(tx, {
+      action: "DEMO_TOURNAMENT_CREATE",
+      userId: admin.id,
+      entityType: "Tournament",
+      entityId: created.id,
+      afterState: {
+        name: created.name,
+        status: created.status,
+        playerCount,
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
     });
 
     return { created, users };
@@ -134,6 +158,16 @@ export async function POST(request: NextRequest) {
   await prisma.tournament.update({
     where: { id: tournament.created.id },
     data: { status: "COMPLETED" },
+  });
+
+  await logAuditEvent(prisma, {
+    action: "DEMO_TOURNAMENT_COMPLETE",
+    userId: admin.id,
+    entityType: "Tournament",
+    entityId: tournament.created.id,
+    afterState: { status: "COMPLETED" },
+    ipAddress: requestMeta.ipAddress,
+    userAgent: requestMeta.userAgent,
   });
 
   return NextResponse.json({

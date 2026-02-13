@@ -53,6 +53,12 @@ export default async function WalletPage() {
     orderBy: { createdAt: "desc" },
     include: { tournament: true },
   });
+  const totalPaid = payouts
+    .filter((payout) => payout.status === "COMPLETED")
+    .reduce((sum, payout) => sum + Number(payout.amount), 0);
+  const totalPending = payouts
+    .filter((payout) => payout.status === "PENDING")
+    .reduce((sum, payout) => sum + Number(payout.amount), 0);
 
   return (
     <div className="min-h-screen px-6 py-16 text-white">
@@ -93,10 +99,45 @@ export default async function WalletPage() {
           </div>
         )}
 
+        <section className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-[rgba(26,32,44,0.7)] p-5">
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+              Total paid
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-white">
+              {formatCurrency(totalPaid.toFixed(2))}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-[rgba(26,32,44,0.7)] p-5">
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+              Pending payouts
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-white">
+              {formatCurrency(totalPending.toFixed(2))}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-[rgba(26,32,44,0.7)] p-5">
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+              Eligible tournaments
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-white">
+              {eligibleTournaments.length}
+            </p>
+          </div>
+        </section>
+
         <section className="rounded-2xl border border-white/10 bg-[rgba(26,32,44,0.7)] p-6">
           <h2 className="text-base font-semibold text-cyan-200">
             Payout history
           </h2>
+          <div className="mt-3">
+            <a
+              href="/api/wallet/export"
+              className="inline-flex rounded-full border border-white/20 px-3 py-1 text-xs text-white/70 transition hover:border-cyan-300 hover:text-white"
+            >
+              Download CSV
+            </a>
+          </div>
           {payouts.length === 0 ? (
             <p className="mt-3 text-sm text-white/60">No payouts yet.</p>
           ) : (

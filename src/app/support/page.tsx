@@ -33,6 +33,9 @@ export default async function SupportPage() {
             <p className="text-white/60">
               File a ticket and track the status in one place.
             </p>
+            <p className="text-xs text-white/40">
+              Typical response within 24 hours for verified accounts.
+            </p>
           </div>
           <Link
             href="/dashboard"
@@ -68,7 +71,7 @@ export default async function SupportPage() {
                       {ticket.subject}
                     </p>
                     <p className="text-xs text-white/40">
-                      {ticket.createdAt.toLocaleString()}
+                      Updated {ticket.updatedAt.toLocaleString()}
                     </p>
                   </Link>
                 ))}

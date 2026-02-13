@@ -53,28 +53,33 @@ export async function getSeasonConfig(): Promise<SeasonConfig> {
   }
 
   const defaults = getSeasonDefaults();
-  const config = await prisma.seasonConfig.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      id: 1,
-      mode: defaults.mode === "free" ? "FREE" : "PAID",
-      freePrizePool: new Prisma.Decimal(defaults.freePrizePool),
-      prizeMode: defaults.prizeMode === "cash" ? "CASH" : "GIFT_CARD",
-      sponsorshipEnabled: defaults.sponsorshipEnabled,
-      sponsorSlots: defaults.sponsorSlots,
-    },
-  });
+  try {
+    const config = await prisma.seasonConfig.upsert({
+      where: { id: 1 },
+      update: {},
+      create: {
+        id: 1,
+        mode: defaults.mode === "free" ? "FREE" : "PAID",
+        freePrizePool: new Prisma.Decimal(defaults.freePrizePool),
+        prizeMode: defaults.prizeMode === "cash" ? "CASH" : "GIFT_CARD",
+        sponsorshipEnabled: defaults.sponsorshipEnabled,
+        sponsorSlots: defaults.sponsorSlots,
+      },
+    });
 
-  const resolved = {
-    mode: config.mode === "FREE" ? "free" : "paid",
-    freePrizePool: Number(config.freePrizePool),
-    prizeMode: config.prizeMode === "CASH" ? "cash" : "gift_card",
-    sponsorshipEnabled: config.sponsorshipEnabled,
-    sponsorSlots: config.sponsorSlots,
-  };
-  cachedSeason = { value: resolved, fetchedAt: Date.now() };
-  return resolved;
+    const resolved = {
+      mode: config.mode === "FREE" ? "free" : "paid",
+      freePrizePool: Number(config.freePrizePool),
+      prizeMode: config.prizeMode === "CASH" ? "cash" : "gift_card",
+      sponsorshipEnabled: config.sponsorshipEnabled,
+      sponsorSlots: config.sponsorSlots,
+    };
+    cachedSeason = { value: resolved, fetchedAt: Date.now() };
+    return resolved;
+  } catch {
+    cachedSeason = { value: defaults, fetchedAt: Date.now() };
+    return defaults;
+  }
 }
 
 export async function setSeasonConfig(

@@ -4,10 +4,28 @@ import { hashPassword } from "@/lib/auth/password";
 import { createSessionToken, setSessionCookie } from "@/lib/auth/session";
 import { registerSchema, normalizeEmail } from "@/lib/auth/validation";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
+import { rateLimit } from "@/lib/rate-limit";
+import { generateToken, getExpiry, hashToken } from "@/lib/auth/tokens";
+import { sendVerificationEmail } from "@/lib/email/auth";
 
 export async function POST(request: NextRequest) {
   if (!isRequestFromAllowedOrigin(request)) {
     return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+  }
+
+  const limit = rateLimit(request, {
+    keyPrefix: "auth:register",
+    windowMs: 60_000,
+    max: 5,
+  });
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: { "Retry-After": limit.retryAfter.toString() },
+      },
+    );
   }
 
   let payload: unknown;
@@ -41,11 +59,26 @@ export async function POST(request: NextRequest) {
       passwordHash,
       name: parsed.data.name,
       displayName: parsed.data.displayName,
+      emailVerifiedAt: null,
       profile: {
         create: {},
       },
     },
   });
+
+  try {
+    const token = generateToken();
+    await prisma.emailVerificationToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken(token),
+        expiresAt: getExpiry(60),
+      },
+    });
+    await sendVerificationEmail(user.email, token);
+  } catch {
+    // Ignore email verification failures.
+  }
 
   const token = await createSessionToken({ sub: user.id, role: user.role });
   setSessionCookie(token);

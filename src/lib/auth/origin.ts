@@ -1,4 +1,6 @@
-import { NextRequest } from "next/server";
+type OriginRequest = {
+  headers: Headers;
+};
 
 function getOrigin(value: string) {
   try {
@@ -8,7 +10,7 @@ function getOrigin(value: string) {
   }
 }
 
-export function isRequestFromAllowedOrigin(request: NextRequest) {
+export function isRequestFromAllowedOrigin(request: OriginRequest) {
   const allowed = process.env.NEXT_PUBLIC_APP_URL;
   if (!allowed) {
     return true;

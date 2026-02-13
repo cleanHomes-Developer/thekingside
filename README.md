@@ -7,6 +7,7 @@ Core:
 - `REDIS_URL` Redis connection string
 - `NEXT_PUBLIC_APP_URL` App base URL (e.g., http://localhost:3000)
 - `AUTH_SECRET` Session signing secret
+- `TOKEN_ENCRYPTION_KEY` Secret for encrypting OAuth tokens at rest (optional, falls back to AUTH_SECRET)
 
 Stripe:
 - `STRIPE_SECRET_KEY` Stripe secret key (test mode)

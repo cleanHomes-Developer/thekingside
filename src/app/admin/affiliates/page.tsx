@@ -76,7 +76,7 @@ export default async function AdminAffiliatesPage() {
                       >
                         <div>
                           <p className="text-xs uppercase tracking-[0.2em] text-white/50">
-                            {program.commissionRange} · {program.cookieDuration}
+                            {program.commissionRange} | {program.cookieDuration}
                           </p>
                           <p className="text-base font-semibold text-white">
                             {program.name}

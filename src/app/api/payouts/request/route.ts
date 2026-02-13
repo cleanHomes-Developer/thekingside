@@ -4,6 +4,8 @@ import { requireUser } from "@/lib/auth/guards";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { canRequestPayout, hasAntiCheatHold } from "@/lib/payments/payouts";
 import { getSeasonConfig } from "@/lib/season";
+import { getPayoutEntitlement } from "@/lib/payments/entitlements";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
 export async function POST(request: NextRequest) {
   if (!isRequestFromAllowedOrigin(request)) {
@@ -22,12 +24,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { tournamentId, amount } = payload as {
+  const { tournamentId } = payload as {
     tournamentId?: string;
-    amount?: number;
   };
 
-  if (!tournamentId || !amount || amount <= 0) {
+  if (!tournamentId) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
@@ -74,19 +75,58 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (Number(amount) > Number(tournament.prizePool)) {
-    return NextResponse.json({ error: "Amount exceeds prize pool" }, { status: 400 });
+  const existingPayout = await prisma.payout.findUnique({
+    where: {
+      userId_tournamentId: {
+        userId: user.id,
+        tournamentId,
+      },
+    },
+  });
+  if (existingPayout) {
+    return NextResponse.json(
+      { payoutId: existingPayout.id, status: existingPayout.status },
+      { status: 200 },
+    );
   }
 
-  const payout = await prisma.payout.create({
-    data: {
+  const entitlement = await getPayoutEntitlement(prisma, tournamentId, user.id);
+  if (!entitlement) {
+    return NextResponse.json({ error: "No payout entitlement" }, { status: 400 });
+  }
+
+  const requestMeta = getRequestMeta(request);
+  const payout = await prisma.$transaction(async (tx) => {
+    const created = await tx.payout.create({
+      data: {
+        userId: user.id,
+        tournamentId,
+        amount: entitlement.amount,
+        entitlementAmount: entitlement.amount,
+        placement: entitlement.placement,
+        status: "PENDING",
+        antiCheatHold: hold,
+        kycVerifiedAt: profile.kycVerifiedAt ?? null,
+      },
+    });
+
+    await logAuditEvent(tx, {
+      action: "PAYOUT_REQUESTED",
       userId: user.id,
-      tournamentId,
-      amount,
-      status: "PENDING",
-      antiCheatHold: hold,
-      kycVerifiedAt: profile.kycVerifiedAt ?? null,
-    },
+      entityType: "Payout",
+      entityId: created.id,
+      beforeState: null,
+      afterState: {
+        amount: entitlement.amount.toString(),
+        placement: entitlement.placement,
+        percent: entitlement.percent.toString(),
+        tournamentId,
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
+
+    return created;
   });
 
   return NextResponse.json({ payoutId: payout.id }, { status: 201 });

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
@@ -77,37 +77,66 @@ export default async function RootLayout({
     },
   ];
   const session = await getSessionFromCookies();
-  const [user, season] = await Promise.all([
-    session?.sub
-      ? prisma.user.findUnique({
+  const season = await getSeasonConfig();
+  let user = null;
+  try {
+    user = session?.sub
+      ? await prisma.user.findUnique({
           where: { id: session.sub },
         })
-      : Promise.resolve(null),
-    getSeasonConfig(),
-  ]);
-  const sponsors = season.sponsorshipEnabled
-    ? await (async () => {
-        const now = new Date();
-        return prisma.sponsor.findMany({
-          where: {
-            active: true,
-            AND: [
-              { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
-              { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
-            ],
-          },
-          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-          take: season.sponsorSlots,
-          select: {
-            id: true,
-            name: true,
-            tier: true,
-            logoUrl: true,
-            websiteUrl: true,
-          },
-        });
-      })()
+      : null;
+  } catch {
+    user = null;
+  }
+  let sponsors: Array<{
+    id: string;
+    name: string;
+    tier: string;
+    logoUrl: string;
+    websiteUrl: string | null;
+  }> = [];
+  if (season.sponsorshipEnabled) {
+    try {
+      const now = new Date();
+      sponsors = await prisma.sponsor.findMany({
+        where: {
+          active: true,
+          AND: [
+            { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+            { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
+          ],
+        },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        take: season.sponsorSlots,
+        select: {
+          id: true,
+          name: true,
+          tier: true,
+          logoUrl: true,
+          websiteUrl: true,
+        },
+      });
+    } catch {
+      sponsors = [];
+    }
+  }
+  const primaryLinks = [
+    { href: "/tournaments", label: "Tournaments" },
+    { href: "/play", label: "Play" },
+  ];
+  const secondaryLinks = [{ href: "/affiliates", label: "Affiliates" }];
+  const authedLinks = user
+    ? [
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/wallet", label: "Wallet" },
+        { href: "/support", label: "Support" },
+        { href: "/anticheat", label: "My cases" },
+        ...(user.role === "ADMIN"
+          ? [{ href: "/admin", label: "Admin", variant: "admin" as const }]
+          : []),
+      ]
     : [];
+  const overflowLinks = [...secondaryLinks, ...authedLinks];
 
   return (
     <html lang="en">
@@ -125,85 +154,72 @@ export default async function RootLayout({
                 The King Side
               </Link>
               <span className="hidden text-[10px] uppercase tracking-[0.35em] text-amber-200/80 md:inline">
-                Only One Can Rule.™
+                {"Only One Can Rule.\u2122"}
               </span>
-              <nav className="flex flex-wrap items-center gap-3">
-                <Link
-                  href="/tournaments"
-                  className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
-                >
-                  Tournaments
-                </Link>
-                <Link
-                  href="/play"
-                  className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
-                >
-                  Play
-                </Link>
-                <Link
-                  href="/demo"
-                  className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
-                >
-                  Demo
-                </Link>
-                <Link
-                  href="/affiliates"
-                  className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
-                >
-                  Affiliates
-                </Link>
-                {user ? (
-                  <>
-                    <Link
-                      href="/dashboard"
-                      className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/wallet"
-                      className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
-                    >
-                      Wallet
-                    </Link>
-                    <Link
-                      href="/support"
-                      className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
-                    >
-                      Support
-                    </Link>
-                    <Link
-                      href="/anticheat"
-                      className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
-                    >
-                      My cases
-                    </Link>
-                    {user.role === "ADMIN" ? (
-                      <Link
-                        href="/admin"
-                        className="rounded-full border border-cyan-400/40 px-3 py-1 text-cyan-200 transition hover:border-cyan-300"
-                      >
-                        Admin
-                      </Link>
-                    ) : null}
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href="/register"
-                      className="rounded-full bg-cyan-400 px-3 py-1 font-semibold text-slate-900 transition hover:bg-cyan-300"
-                    >
-                      Register
-                    </Link>
-                  </>
-                )}
-              </nav>
+              <nav className="flex flex-1 flex-wrap items-center justify-end gap-3">
+  <div className="flex items-center gap-3">
+    {primaryLinks.map((link) => (
+      <Link
+        key={link.href}
+        href={link.href}
+        className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
+      >
+        {link.label}
+      </Link>
+    ))}
+  </div>
+  <div className="hidden items-center gap-3 lg:flex">
+    {overflowLinks.map((link) => (
+      <Link
+        key={link.href}
+        href={link.href}
+        className={
+          link.variant === "admin"
+            ? "rounded-full border border-cyan-400/40 px-3 py-1 text-cyan-200 transition hover:border-cyan-300"
+            : "rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
+        }
+      >
+        {link.label}
+      </Link>
+    ))}
+  </div>
+  {overflowLinks.length ? (
+    <details className="relative lg:hidden">
+      <summary className="list-none cursor-pointer rounded-full border border-white/15 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/70 transition hover:border-cyan-300 hover:text-white">
+        More
+      </summary>
+      <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-white/10 bg-[#0c1628] p-2 text-xs text-white/80 shadow-[0_15px_45px_rgba(0,0,0,0.45)]">
+        <div className="flex flex-col gap-1">
+          {overflowLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-cyan-200"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </details>
+  ) : null}
+  {user ? null : (
+    <>
+      <Link
+        href="/login"
+        className="rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
+      >
+        Login
+      </Link>
+      <Link
+        href="/register"
+        className="rounded-full bg-cyan-400 px-3 py-1 font-semibold text-slate-900 transition hover:bg-cyan-300"
+      >
+        Register
+      </Link>
+    </>
+  )}
+</nav>
             </div>
           </header>
           <main>{children}</main>
@@ -211,11 +227,11 @@ export default async function RootLayout({
             <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 md:grid-cols-[1.2fr_1fr_1fr]">
               <div className="space-y-2">
                 <p className="text-xs text-white/50">
-                  © 2026 The King Side™. All rights reserved.
+                  {"\u00a9 2026 The King Side\u2122. All rights reserved."}
                 </p>
                 <p className="text-[10px] text-white/40">
-                  The King Side™ is a trademark of The King Side. All other
-                  trademarks belong to their respective owners.
+                  {"The King Side\u2122 is a trademark of The King Side. All other "}
+                  {"trademarks belong to their respective owners."}
                 </p>
               </div>
               <div className="space-y-2">
@@ -325,4 +341,6 @@ export default async function RootLayout({
     </html>
   );
 }
+
+
 

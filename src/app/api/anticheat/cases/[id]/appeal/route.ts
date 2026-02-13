@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth/guards";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { appealSchema } from "@/lib/anticheat/validation";
+import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
 type RouteContext = {
   params: { id: string };
@@ -47,12 +48,30 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     );
   }
 
-  await prisma.antiCheatCase.update({
-    where: { id: caseItem.id },
-    data: {
-      appealText: parsed.data.appealText,
-      status: "APPEALED",
-    },
+  const requestMeta = getRequestMeta(request);
+  await prisma.$transaction(async (tx) => {
+    const updated = await tx.antiCheatCase.update({
+      where: { id: caseItem.id },
+      data: {
+        appealText: parsed.data.appealText,
+        status: "APPEALED",
+      },
+    });
+
+    await logAuditEvent(tx, {
+      action: "ANTICHEAT_APPEAL",
+      userId: user.id,
+      entityType: "AntiCheatCase",
+      entityId: updated.id,
+      beforeState: {
+        status: caseItem.status,
+      },
+      afterState: {
+        status: updated.status,
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
   });
 
   return NextResponse.json({ ok: true });

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth/guards";
 import { exchangeLichessToken, fetchLichessAccount } from "@/lib/lichess/client";
+import { encryptToken } from "@/lib/security/tokens";
 
 const STATE_COOKIE = "tks_lichess_state";
 
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/lichess/callback`;
   const token = await exchangeLichessToken(code, redirectUri);
   const account = await fetchLichessAccount(token.access_token);
+  const encryptedToken = encryptToken(token.access_token);
 
   await prisma.profile.upsert({
     where: { userId: user.id },
@@ -32,14 +34,14 @@ export async function GET(request: NextRequest) {
       userId: user.id,
       lichessUsername: account.username,
       lichessUserId: account.id,
-      lichessAccessToken: token.access_token,
+      lichessAccessToken: encryptedToken,
       lichessTokenCreatedAt: new Date(),
       lichessLinkedAt: new Date(),
     },
     update: {
       lichessUsername: account.username,
       lichessUserId: account.id,
-      lichessAccessToken: token.access_token,
+      lichessAccessToken: encryptedToken,
       lichessTokenCreatedAt: new Date(),
       lichessLinkedAt: new Date(),
     },

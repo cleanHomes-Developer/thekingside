@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { getSessionFromCookies } from "@/lib/auth/session";
 import { buildMatchSnapshot } from "@/lib/play/match";
 import { publishPlayStream } from "@/lib/play/stream";
+import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
+import { rateLimit } from "@/lib/rate-limit";
 
 const GUEST_COOKIE = "tks_guest";
 const DEFAULT_RATING = 1200;
@@ -65,7 +67,21 @@ function resolveRange(queuedAt: Date) {
   return waited > EXPAND_AFTER_MS ? EXPANDED_RANGE : BASE_RANGE;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  if (!isRequestFromAllowedOrigin(request)) {
+    return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+  }
+  const limit = rateLimit(request, {
+    keyPrefix: "play:queue",
+    windowMs: 60_000,
+    max: 30,
+  });
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": limit.retryAfter.toString() } },
+    );
+  }
   const body = await request.json().catch(() => null);
   const requestedTimeControlRaw =
     body && typeof body.timeControl === "string" ? body.timeControl : "3+0";
@@ -222,7 +238,21 @@ export async function POST(request: Request) {
   return NextResponse.json({ match: snapshot, queue: null });
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  if (!isRequestFromAllowedOrigin(request)) {
+    return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+  }
+  const limit = rateLimit(request, {
+    keyPrefix: "play:queue",
+    windowMs: 60_000,
+    max: 30,
+  });
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": limit.retryAfter.toString() } },
+    );
+  }
   const player = await getOrCreatePlayer();
   if (!player) {
     return NextResponse.json(

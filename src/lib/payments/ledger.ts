@@ -4,11 +4,18 @@ const PLATFORM_SHARE = new Prisma.Decimal("0.25");
 const PRIZE_SHARE = new Prisma.Decimal("0.75");
 
 export type LedgerInput = {
-  type: "ENTRY_FEE" | "PLATFORM_FEE" | "STRIPE_FEE" | "PAYOUT" | "REFUND";
+  type:
+    | "ENTRY_FEE"
+    | "PLATFORM_FEE"
+    | "STRIPE_FEE"
+    | "PAYOUT"
+    | "REFUND"
+    | "SEED";
   amount: Prisma.Decimal;
   description: string;
   relatedUserId?: string | null;
   relatedPayoutId?: string | null;
+  affectsBalance?: boolean;
 };
 
 export function calculateEntryAllocation(amount: Prisma.Decimal) {
@@ -34,7 +41,10 @@ export async function createLedgerEntries(
   const created: string[] = [];
 
   for (const entry of entries) {
-    balance = balance.add(entry.amount);
+    const impacts = entry.affectsBalance ?? true;
+    if (impacts) {
+      balance = balance.add(entry.amount);
+    }
     const createdEntry = await tx.prizePoolLedger.create({
       data: {
         tournamentId,

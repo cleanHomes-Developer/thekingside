@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { prisma } from "@/lib/db";
+import crypto from "crypto";
 
 export const metadata: Metadata = {
   title: "Only One Can Rule",
@@ -25,10 +27,6 @@ export const metadata: Metadata = {
   },
 };
 
-const prizeCurrent = 0;
-const prizeTarget = 1000;
-const prizePct = Math.round((prizeCurrent / prizeTarget) * 100);
-
 const momentumCards = [
   { label: "Founding roster", value: "Open" },
   { label: "Competitors arriving", value: "Daily" },
@@ -48,7 +46,22 @@ const milestones = [
   { key: "10000", label: <>10,000 players &mdash; $1,000 prize equivalent</> },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  let playerCount = 0;
+  try {
+    playerCount = await prisma.user.count();
+  } catch {
+    playerCount = 0;
+  }
+  const nextTarget = 100;
+  const prizeTarget = 1000;
+  const prizeCurrent = Math.min(playerCount, prizeTarget);
+  const prizePct = Math.round((prizeCurrent / prizeTarget) * 100);
+  const seed = crypto
+    .createHash("sha256")
+    .update(`${playerCount}|${new Date().toISOString().slice(0, 10)}`)
+    .digest("hex")
+    .slice(0, 12);
   return (
     <div className="relative overflow-hidden">
       <section className="mx-auto w-full max-w-6xl px-6 pb-10 pt-16">
@@ -99,6 +112,9 @@ export default function LandingPage() {
               ${prizeCurrent.toFixed(2)}
               <span className="text-white/40"> / ${prizeTarget.toFixed(2)}</span>
             </p>
+            <p className="mt-2 text-xs uppercase tracking-[0.3em] text-white/50">
+              {playerCount} / {nextTarget} to next milestone
+            </p>
             <div className="mt-3 h-2 w-full rounded-full bg-white/10">
               <div
                 className="h-2 rounded-full bg-gradient-to-r from-cyan-400 via-cyan-200 to-amber-300"
@@ -111,6 +127,9 @@ export default function LandingPage() {
             <p className="mt-4 text-sm text-white/70">
               As the arena fills, The King Side will honor the moment. At each
               milestone, one founding competitor is chosen.
+            </p>
+            <p className="mt-2 text-xs text-white/50">
+              Selection seed hash: {seed}
             </p>
           </div>
         </div>

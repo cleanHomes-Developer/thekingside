@@ -36,9 +36,9 @@ export default function IsometricPage() {
             Isometric chess grid
           </h1>
           <p className="mt-3 max-w-2xl text-lg text-white/70">
-            This page is purely experimental — an isometric chess board motif
+            This page is purely experimental - an isometric chess board motif
             built with layered gradients. The skewed grid mimics depth so your
-            pieces feel like they’re floating on a premium table.
+            pieces feel like they are floating on a premium table.
           </p>
           <div className="mt-6 flex flex-wrap gap-4">
             <Link

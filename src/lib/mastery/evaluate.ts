@@ -1,7 +1,8 @@
-import { Chess, Move } from "chess.js";
+﻿import { Chess, Move } from "chess.js";
 import { prisma } from "@/lib/db";
 import { ensureMasterySeeded } from "@/lib/mastery/seed";
 import { levelFromXp } from "@/lib/mastery/taxonomy";
+import { selectStrengthsWeaknesses } from "@/lib/mastery/summary";
 
 type SkillScore = {
   xp: number;
@@ -319,7 +320,36 @@ function isOutpost(game: Chess, move: Move, color: "w" | "b") {
   return pawnAttacksSquare(game, move.to, color);
 }
 
-function buildStats(moves: string[], playerColor: "w" | "b") {
+type MoveInput = {
+  san: string;
+  uci?: string | null;
+};
+
+function applyMove(game: Chess, move: MoveInput | undefined | null) {
+  if (!move) {
+    return null;
+  }
+  if (move.uci) {
+    const from = move.uci.slice(0, 2);
+    const to = move.uci.slice(2, 4);
+    const promotion = move.uci[4] ?? undefined;
+    try {
+      return game.move({ from, to, promotion });
+    } catch {
+      // Fall back to SAN parsing below.
+    }
+  }
+  if (!move.san) {
+    return null;
+  }
+  try {
+    return game.move(move.san, { sloppy: true });
+  } catch {
+    return null;
+  }
+}
+
+function buildStats(moves: MoveInput[], playerColor: "w" | "b") {
   const game = new Chess();
   const stats: PlayerStats = {
     centerMoves: 0,
@@ -354,12 +384,14 @@ function buildStats(moves: string[], playerColor: "w" | "b") {
   const evalSeries: number[] = [materialScore(game)];
   const wingMoves: ("kingside" | "queenside" | "center")[] = [];
   let sacrificesWindow: number[] = [];
+  let invalidMoves = 0;
 
   for (let ply = 0; ply < moves.length; ply += 1) {
     const beforeEval = materialScore(game);
     const beforePieceCount = materialCount(game);
-    const move = game.move(moves[ply] ?? "", { sloppy: true });
+    const move = applyMove(game, moves[ply]);
     if (!move) {
+      invalidMoves += 1;
       break;
     }
     const afterEval = materialScore(game);
@@ -480,7 +512,7 @@ function buildStats(moves: string[], playerColor: "w" | "b") {
     stats.resilience = true;
   }
 
-  return stats;
+  return { stats, invalidMoves };
 }
 
 function scoresFromStats(stats: PlayerStats) {
@@ -644,14 +676,23 @@ function scoresFromStats(stats: PlayerStats) {
   return scores;
 }
 
-function buildFeedback(playerName: string, strengths: string[], weaknesses: string[]) {
+function buildFeedback(
+  playerName: string,
+  strengths: string[],
+  weaknesses: string[],
+  invalidMoves = 0,
+) {
   const strengthLine = strengths.length
     ? `Your ${strengths[0]} stood out today.`
     : "You showed solid focus today.";
   const weaknessLine = weaknesses.length
-    ? `Let’s focus next on ${weaknesses[0]}.`
+    ? `Let's focus next on ${weaknesses[0]}.`
     : "Keep building consistency in your core skills.";
-  return `${playerName}, ${strengthLine} ${weaknessLine}`;
+  const integrityLine =
+    invalidMoves > 0
+      ? "Some moves could not be parsed, so this review is partial."
+      : "";
+  return `${playerName}, ${strengthLine} ${weaknessLine}${integrityLine ? ` ${integrityLine}` : ""}`;
 }
 
 export async function evaluateMasteryForMatch(matchId: string) {
@@ -670,9 +711,15 @@ export async function evaluateMasteryForMatch(matchId: string) {
     return;
   }
 
-  const moves = match.moves.map((move) => move.san);
-  const whiteStats = buildStats(moves, "w");
-  const blackStats = buildStats(moves, "b");
+  const moves = match.moves.map((move) => ({ san: move.san, uci: move.uci }));
+  const { stats: whiteStats, invalidMoves: whiteInvalidMoves } = buildStats(
+    moves,
+    "w",
+  );
+  const { stats: blackStats, invalidMoves: blackInvalidMoves } = buildStats(
+    moves,
+    "b",
+  );
 
   const skills = await prisma.masterySkill.findMany();
   const skillsByKey = new Map(skills.map((skill) => [skill.key, skill]));
@@ -682,6 +729,7 @@ export async function evaluateMasteryForMatch(matchId: string) {
     playerId: string,
     stats: PlayerStats,
     playerName: string,
+    invalidMoves: number,
   ) => {
     const scoreMap = scoresFromStats(stats);
     const existing = await tx.masteryPlayerSkill.findMany({
@@ -689,8 +737,7 @@ export async function evaluateMasteryForMatch(matchId: string) {
     });
     const existingMap = new Map(existing.map((row) => [row.skillId, row]));
 
-    const strengths: Array<{ key: string; xp: number }> = [];
-    const weaknesses: Array<{ key: string; xp: number }> = [];
+    const scoreRows: Array<{ key: string; xp: number }> = [];
 
     for (const [key, score] of Object.entries(scoreMap)) {
       const skill = skillsByKey.get(key);
@@ -734,15 +781,17 @@ export async function evaluateMasteryForMatch(matchId: string) {
         },
       });
 
-      strengths.push({ key: skill.name, xp: deltaXp });
-      weaknesses.push({ key: skill.name, xp: deltaXp });
+      scoreRows.push({ key: skill.name, xp: deltaXp });
     }
 
-    strengths.sort((a, b) => b.xp - a.xp);
-    weaknesses.sort((a, b) => a.xp - b.xp);
-    const topStrengths = strengths.slice(0, 3).map((item) => item.key);
-    const topWeaknesses = weaknesses.slice(0, 3).map((item) => item.key);
-    const summary = buildFeedback(playerName, topStrengths, topWeaknesses);
+    const { strengths: topStrengths, weaknesses: topWeaknesses } =
+      selectStrengthsWeaknesses(scoreRows, 3);
+    const summary = buildFeedback(
+      playerName,
+      topStrengths,
+      topWeaknesses,
+      invalidMoves,
+    );
 
     await tx.masteryFeedback.create({
       data: {
@@ -762,12 +811,14 @@ export async function evaluateMasteryForMatch(matchId: string) {
       match.playerWhiteId,
       whiteStats,
       match.playerWhite.displayName,
+      whiteInvalidMoves,
     );
     await processPlayer(
       tx,
       match.playerBlackId,
       blackStats,
       match.playerBlack.displayName,
+      blackInvalidMoves,
     );
     await tx.casualMatch.update({
       where: { id: matchId },
@@ -775,3 +826,4 @@ export async function evaluateMasteryForMatch(matchId: string) {
     });
   });
 }
+

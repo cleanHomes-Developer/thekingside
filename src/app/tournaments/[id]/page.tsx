@@ -25,6 +25,7 @@ type MatchSummary = {
   player2Id: string | null;
   status: MatchStatus;
   result: string | null;
+  lichessGameId: string | null;
 };
 
 function getDisplayName(
@@ -94,6 +95,7 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
     player2Id: match.player2Id,
     status: match.status as MatchStatus,
     result: match.result,
+    lichessGameId: match.lichessGameId,
   }));
 
   const liveMatches = summaries.filter((match) => match.status === "IN_PROGRESS");
@@ -156,6 +158,11 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
               {tournament.status.replace("_", " ")}
             </div>
           </div>
+          {locked ? (
+            <div className="mt-4 rounded-2xl border border-amber-300/30 bg-[rgba(24,22,12,0.6)] px-4 py-3 text-xs text-amber-100">
+              Registration is locked. Bracket is finalized.
+            </div>
+          ) : null}
 
           <div className="mt-6 grid gap-3 rounded-2xl border border-white/10 bg-[#0a111f]/70 p-4 text-xs text-white/60 md:grid-cols-3">
             <div>
@@ -225,12 +232,20 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
                           {getDisplayName(entries, match.player2Id)}
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        className="rounded-full border border-cyan-300/40 px-4 py-1 text-xs text-cyan-100"
-                      >
-                        Watch
-                      </button>
+                      {match.lichessGameId ? (
+                        <a
+                          href={`https://lichess.org/${match.lichessGameId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-full border border-cyan-300/40 px-4 py-1 text-xs text-cyan-100"
+                        >
+                          Watch
+                        </a>
+                      ) : (
+                        <span className="rounded-full border border-white/15 px-4 py-1 text-xs text-white/40">
+                          Watch
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -286,7 +301,7 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
                           {index + 1}. {entryUser?.user.displayName ?? "Unknown"}
                         </span>
                         <span className="text-white/50">
-                          {standing.points} pts · {standing.wins}W/
+                          {standing.points} pts | {standing.wins}W/
                           {standing.draws}D/{standing.losses}L
                         </span>
                       </div>
@@ -366,6 +381,12 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
                     {waitlistEntries.length}
                   </p>
                 ) : null}
+                <p className="text-xs text-white/50">
+                  Refunds are available before lock.{" "}
+                  <Link href="/refund-policy" className="text-cyan-200">
+                    View policy
+                  </Link>
+                </p>
               </div>
             </div>
 
