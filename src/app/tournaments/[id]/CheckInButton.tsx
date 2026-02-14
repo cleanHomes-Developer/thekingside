@@ -52,6 +52,10 @@ export default function CheckInButton({
             ? "Checked in"
             : "Check in"}
       </button>
+      <p className="text-[10px] text-white/40">
+        Check-in opens 20 minutes before start. Entries made during the
+        window are auto checked-in.
+      </p>
       {message ? (
         <p className="text-xs text-red-200">{message}</p>
       ) : null}

@@ -113,8 +113,7 @@ export async function fetchLichessGame(gameId: string, accessToken: string) {
     throw new Error("Failed to fetch Lichess game");
   }
 
-  return (await response.json()) as {
-    status: string;
-    winner?: "white" | "black";
-  };
+  const data = await response.json();
+  const { parseLichessGame } = await import("./schema");
+  return parseLichessGame(data);
 }

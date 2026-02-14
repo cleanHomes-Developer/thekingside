@@ -25,17 +25,28 @@ function buildFilters(input: z.infer<typeof announcementSchema>) {
   return null;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const announcements = await prisma.adminAnnouncement.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const page = Math.max(Number(request.nextUrl.searchParams.get("page") ?? "1") || 1, 1);
+  const limit = Math.min(
+    Math.max(Number(request.nextUrl.searchParams.get("limit") ?? "20") || 20, 1),
+    100,
+  );
+  const skip = (page - 1) * limit;
+  const [announcements, total] = await prisma.$transaction([
+    prisma.adminAnnouncement.findMany({
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.adminAnnouncement.count(),
+  ]);
 
-  return NextResponse.json({ announcements });
+  return NextResponse.json({ announcements, page, total, pageSize: limit });
 }
 
 export async function POST(request: NextRequest) {

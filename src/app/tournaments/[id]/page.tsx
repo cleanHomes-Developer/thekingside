@@ -11,6 +11,7 @@ import { getSeasonConfig } from "@/lib/season";
 import { getSwissRounds } from "@/lib/tournaments/swiss";
 import CheckInButton from "./CheckInButton";
 import CountdownBadge from "../CountdownBadge";
+import ScheduleTimeline from "./ScheduleTimeline";
 
 type TournamentPageProps = {
   params: { id: string };
@@ -52,7 +53,9 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
   const session = await getSessionFromCookies();
   const season = await getSeasonConfig();
   const isFreeSeason = season.mode === "free";
-  const [entry, entries, waitlistEntries, matches] = await Promise.all([
+  const matchLimit = 200;
+  const [entry, entries, waitlistEntries, matches, standingsMatches] =
+    await Promise.all([
     session?.sub
       ? prisma.entry.findUnique({
           where: {
@@ -74,6 +77,11 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
     prisma.match.findMany({
       where: { tournamentId: tournament.id },
       orderBy: [{ round: "asc" }, { scheduledAt: "asc" }],
+      take: matchLimit,
+    }),
+    prisma.match.findMany({
+      where: { tournamentId: tournament.id },
+      select: { player1Id: true, player2Id: true, result: true },
     }),
   ]);
 
@@ -114,7 +122,7 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
 
   const standings = buildStandings(
     entries.map((item) => ({ userId: item.userId })),
-    matches.map((match) => ({
+    standingsMatches.map((match) => ({
       player1Id: match.player1Id,
       player2Id: match.player2Id,
       result: match.result as "PLAYER1" | "PLAYER2" | "DRAW" | null,
@@ -316,6 +324,14 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
                 Registration
               </h2>
               <div className="mt-4 space-y-3">
+                <p className="text-xs text-white/50">
+                  Steps: Register, check in, lock, play.
+                </p>
+                <ScheduleTimeline
+                  checkInOpensAt={checkInOpensAt.toISOString()}
+                  lockAt={tournament.lockAt.toISOString()}
+                  startAt={tournament.startDate.toISOString()}
+                />
                 <p>
                   <span className="text-white/50">Starts:</span>{" "}
                   {formatDateTime(tournament.startDate)}

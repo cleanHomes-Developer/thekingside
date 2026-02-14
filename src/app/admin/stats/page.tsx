@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guards";
 import { formatCurrency } from "@/lib/format";
 
+export const revalidate = 30;
+
 const CHART_DAYS = 17;
 const SEASON_DAYS = 30;
 

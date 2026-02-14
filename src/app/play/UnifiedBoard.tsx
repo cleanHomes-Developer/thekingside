@@ -146,9 +146,11 @@ export default function UnifiedBoard({
       return;
     }
     const stored = window.localStorage.getItem("tks-play-focus");
-    if (stored === "1") {
+    if (stored === null) {
       setFocusMode(true);
+      return;
     }
+    setFocusMode(stored === "1");
   }, []);
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1516,10 +1518,13 @@ export default function UnifiedBoard({
           </div>
         </div>
 
-        <div className="rounded-2xl border panel-soft p-4 text-sm text-white/70 min-h-[180px]">
-          <p className="text-xs uppercase tracking-[0.25em] text-white/40">
+        <details
+          className="rounded-2xl border panel-soft p-4 text-sm text-white/70"
+          open={!focusMode}
+        >
+          <summary className="cursor-pointer list-none text-xs uppercase tracking-[0.25em] text-white/40">
             Controls
-          </p>
+          </summary>
           <p className="mt-2 text-white/70">
             {mode === "player"
               ? queue
@@ -1691,35 +1696,37 @@ export default function UnifiedBoard({
           ) : (
             <p className="mt-2 text-xs text-white/50 opacity-0">Spacer</p>
           )}
-        </div>
+        </details>
 
-        <div className="rounded-2xl border panel-soft p-4 text-sm text-white/70 min-h-[120px]">
-          <p className="text-xs uppercase tracking-[0.25em] text-white/40">
-            Details
-          </p>
-          {mode === "player" ? (
-            <ul className="mt-2 space-y-2 text-xs text-white/60">
-              <li>Everyone starts at 1200.</li>
-              <li>Matchmaking stays near your rating.</li>
-              <li>Ratings update after every game.</li>
-            </ul>
-          ) : (
-            <div className="mt-2 space-y-2 text-xs text-white/60">
-              <div className="flex items-center justify-between">
-                <span>Player</span>
-                <span className="text-cyan-200">{formattedPlayerTime}</span>
+        {!focusMode ? (
+          <div className="rounded-2xl border panel-soft p-4 text-sm text-white/70 min-h-[120px]">
+            <p className="text-xs uppercase tracking-[0.25em] text-white/40">
+              Details
+            </p>
+            {mode === "player" ? (
+              <ul className="mt-2 space-y-2 text-xs text-white/60">
+                <li>Everyone starts at 1200.</li>
+                <li>Matchmaking stays near your rating.</li>
+                <li>Ratings update after every game.</li>
+              </ul>
+            ) : (
+              <div className="mt-2 space-y-2 text-xs text-white/60">
+                <div className="flex items-center justify-between">
+                  <span>Player</span>
+                  <span className="text-cyan-200">{formattedPlayerTime}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Bot</span>
+                  <span className="text-cyan-200">{formattedBotTime}</span>
+                </div>
+                <div className="flex items-center justify-between opacity-0">
+                  <span>Spacer</span>
+                  <span>00:00</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span>Bot</span>
-                <span className="text-cyan-200">{formattedBotTime}</span>
-              </div>
-              <div className="flex items-center justify-between opacity-0">
-                <span>Spacer</span>
-                <span>00:00</span>
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        ) : null}
 
         {mode === "player" && error ? (
           <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-100">

@@ -5,6 +5,7 @@ import {
   calculateEntryAllocation,
   createLedgerEntries,
 } from "@/lib/payments/ledger";
+import { extractCheckoutSessionDetails } from "@/lib/payments/webhook";
 import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 import { Prisma } from "@prisma/client";
 import Stripe from "stripe";
@@ -31,8 +32,7 @@ export async function POST(request: NextRequest) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const entryId = session.metadata?.entryId;
-    const paymentIntentId = session.payment_intent?.toString() ?? null;
+    const { entryId, paymentIntentId } = extractCheckoutSessionDetails(session);
     if (entryId) {
       const requestMeta = getRequestMeta(request);
       let stripeFee = new Prisma.Decimal(0);

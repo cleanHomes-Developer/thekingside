@@ -4,16 +4,29 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guards";
 import AdminSupportTable from "./AdminSupportTable";
 
-export default async function AdminSupportPage() {
+export default async function AdminSupportPage({
+  searchParams,
+}: {
+  searchParams?: { page?: string };
+}) {
   const admin = await requireAdmin();
   if (!admin) {
     redirect("/dashboard");
   }
 
-  const tickets = await prisma.supportTicket.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { user: true, tournament: true },
-  });
+  const page = Math.max(Number(searchParams?.page ?? "1") || 1, 1);
+  const pageSize = 25;
+  const skip = (page - 1) * pageSize;
+  const [tickets, total] = await prisma.$transaction([
+    prisma.supportTicket.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { user: true, tournament: true },
+      skip,
+      take: pageSize,
+    }),
+    prisma.supportTicket.count(),
+  ]);
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
 
   return (
     <div className="min-h-screen px-6 py-16 text-white">
@@ -48,6 +61,36 @@ export default async function AdminSupportPage() {
             }))}
           />
         </div>
+
+        {totalPages > 1 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-white/60">
+            <span>
+              Page {page} of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <Link
+                href={`/admin/support?page=${Math.max(page - 1, 1)}`}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  page === 1
+                    ? "border-white/10 text-white/30 pointer-events-none"
+                    : "border-white/20 text-white/80 hover:border-cyan-300"
+                }`}
+              >
+                Previous
+              </Link>
+              <Link
+                href={`/admin/support?page=${Math.min(page + 1, totalPages)}`}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  page === totalPages
+                    ? "border-white/10 text-white/30 pointer-events-none"
+                    : "border-white/20 text-white/80 hover:border-cyan-300"
+                }`}
+              >
+                Next
+              </Link>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -191,40 +191,26 @@ export default function AdminTournamentEditForm({
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-cyan-200">Edit tournament</h2>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={generateBracket}
-            disabled={status === "bracket"}
-            className="rounded-full border border-cyan-400/40 px-4 py-2 text-xs font-semibold text-cyan-100 transition hover:border-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {status === "bracket" ? "Generating..." : "Generate bracket"}
-          </button>
-          <button
-            type="button"
-            onClick={createGames}
-            disabled={status === "games"}
-            className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold text-white/80 transition hover:border-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {status === "games" ? "Creating..." : "Create games"}
-          </button>
-          <button
-            type="button"
-            onClick={syncResults}
-            disabled={status === "sync"}
-            className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold text-white/80 transition hover:border-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {status === "sync" ? "Syncing..." : "Sync results"}
-          </button>
-          <button
-            type="button"
-            onClick={deleteTournament}
-            disabled={status === "deleting"}
-            className="rounded-full border border-red-400/40 px-4 py-2 text-xs font-semibold text-red-200 transition hover:border-red-300 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {status === "deleting" ? "Deleting..." : "Delete"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={deleteTournament}
+          disabled={status === "deleting"}
+          className="rounded-full border border-red-400/40 px-4 py-2 text-xs font-semibold text-red-200 transition hover:border-red-300 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {status === "deleting" ? "Deleting..." : "Delete"}
+        </button>
+      </div>
+      <div className="rounded-lg border border-white/10 bg-[#0b1426] p-3 text-xs text-white/70">
+        <p className="text-[11px] uppercase tracking-[0.25em] text-white/40">
+          Simple flow
+        </p>
+        <p className="mt-2">
+          Players register, check-in opens 20 minutes before start, and the
+          bracket auto-locks 2 minutes before start.
+        </p>
+        <p className="mt-1 text-white/50">
+          Swiss round 1 and Lichess games are created automatically at lock.
+        </p>
       </div>
 
       {isFreeSeason ? (
@@ -290,23 +276,6 @@ export default function AdminTournamentEditForm({
             className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
           />
         </div>
-        <div>
-          <label className="text-sm text-white/70" htmlFor="minPlayers">
-            Min players
-          </label>
-          <input
-            id="minPlayers"
-            name="minPlayers"
-            type="number"
-            min={2}
-            required
-            value={form.minPlayers}
-            onChange={(event) =>
-              setForm((prev) => ({ ...prev, minPlayers: event.target.value }))
-            }
-            className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
-          />
-        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -344,24 +313,6 @@ export default function AdminTournamentEditForm({
           />
         </div>
         <div>
-          <label className="text-sm text-white/70" htmlFor="endDate">
-            End date
-          </label>
-          <input
-            id="endDate"
-            name="endDate"
-            type="datetime-local"
-            value={form.endDate}
-            onChange={(event) =>
-              setForm((prev) => ({ ...prev, endDate: event.target.value }))
-            }
-            className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <div>
           <label className="text-sm text-white/70" htmlFor="timeControl">
             Time control
           </label>
@@ -376,57 +327,136 @@ export default function AdminTournamentEditForm({
             placeholder="5+3"
           />
         </div>
-        <div>
-          <label className="text-sm text-white/70" htmlFor="seriesKey">
-            Series key
-          </label>
-          <input
-            id="seriesKey"
-            name="seriesKey"
-            value={form.seriesKey}
-            onChange={(event) =>
-              setForm((prev) => ({ ...prev, seriesKey: event.target.value }))
-            }
-            className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="text-sm text-white/70" htmlFor="slotKey">
-            Slot key
-          </label>
-          <input
-            id="slotKey"
-            name="slotKey"
-            value={form.slotKey}
-            onChange={(event) =>
-              setForm((prev) => ({ ...prev, slotKey: event.target.value }))
-            }
-            className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
-          />
-        </div>
+      </div>
       </div>
 
-      <div>
-        <label className="text-sm text-white/70" htmlFor="description">
-          Description
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          rows={3}
-          value={form.description}
-          onChange={(event) =>
-            setForm((prev) => ({ ...prev, description: event.target.value }))
-          }
-          className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
-        />
-      </div>
+      <details className="rounded-2xl border border-white/10 bg-[#0b1426] p-4 text-sm text-white/60">
+        <summary className="cursor-pointer text-xs uppercase tracking-[0.3em] text-white/50">
+          Advanced settings
+        </summary>
+        <p className="mt-2 text-xs text-white/50">
+          Defaults: min players 8, lock at start minus 2 minutes, check-in
+          opens 20 minutes before start.
+        </p>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          <div>
+            <label className="text-sm text-white/70" htmlFor="minPlayers">
+              Min players
+            </label>
+            <input
+              id="minPlayers"
+              name="minPlayers"
+              type="number"
+              min={2}
+              required
+              value={form.minPlayers}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, minPlayers: event.target.value }))
+              }
+              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-white/70" htmlFor="endDate">
+              End date
+            </label>
+            <input
+              id="endDate"
+              name="endDate"
+              type="datetime-local"
+              value={form.endDate}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, endDate: event.target.value }))
+              }
+              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-white/70" htmlFor="seriesKey">
+              Series key
+            </label>
+            <input
+              id="seriesKey"
+              name="seriesKey"
+              value={form.seriesKey}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, seriesKey: event.target.value }))
+              }
+              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-white/70" htmlFor="slotKey">
+              Slot key
+            </label>
+            <input
+              id="slotKey"
+              name="slotKey"
+              value={form.slotKey}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, slotKey: event.target.value }))
+              }
+              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
+            />
+          </div>
+          <div className="md:col-span-3">
+            <label className="text-sm text-white/70" htmlFor="description">
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows={3}
+              value={form.description}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, description: event.target.value }))
+              }
+              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
+            />
+          </div>
+        </div>
+      </details>
 
       {error ? (
         <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
           {error}
         </p>
       ) : null}
+
+      <details className="rounded-lg border border-white/10 bg-[#0b1426] p-3 text-xs text-white/70">
+        <summary className="cursor-pointer text-[11px] uppercase tracking-[0.25em] text-white/50">
+          Advanced controls
+        </summary>
+        <p className="mt-2 text-white/50">
+          Use only if you need to force a step manually.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={generateBracket}
+            disabled={status === "bracket"}
+            className="rounded-full border border-cyan-400/40 px-4 py-2 text-xs font-semibold text-cyan-100 transition hover:border-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {status === "bracket" ? "Generating..." : "Generate bracket"}
+          </button>
+          <button
+            type="button"
+            onClick={createGames}
+            disabled={status === "games"}
+            className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold text-white/80 transition hover:border-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {status === "games" ? "Creating..." : "Create games"}
+          </button>
+          <button
+            type="button"
+            onClick={syncResults}
+            disabled={status === "sync"}
+            className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold text-white/80 transition hover:border-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {status === "sync" ? "Syncing..." : "Sync results"}
+          </button>
+        </div>
+      </details>
 
       <button
         type="submit"

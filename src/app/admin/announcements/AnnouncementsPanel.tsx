@@ -32,18 +32,30 @@ export default function AnnouncementsPanel() {
   const [form, setForm] = useState(initialForm);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const pageSize = 20;
 
-  const load = async () => {
-    const res = await fetch("/api/admin/announcements");
+  const load = async (pageNumber = page) => {
+    const res = await fetch(
+      `/api/admin/announcements?page=${pageNumber}&limit=${pageSize}`,
+    );
     if (!res.ok) {
       return;
     }
-    const data = (await res.json()) as { announcements: Announcement[] };
+    const data = (await res.json()) as {
+      announcements: Announcement[];
+      total: number;
+      page: number;
+      pageSize: number;
+    };
     setAnnouncements(data.announcements);
+    setTotal(data.total ?? 0);
+    setPage(data.page ?? pageNumber);
   };
 
   useEffect(() => {
-    load();
+    load(1);
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -80,7 +92,7 @@ export default function AnnouncementsPanel() {
     }
     setForm(initialForm);
     setNotice("Announcement created.");
-    load();
+    load(1);
   };
 
   const sendAnnouncement = async (id: string) => {
@@ -93,7 +105,7 @@ export default function AnnouncementsPanel() {
       return;
     }
     setNotice("Announcement queued.");
-    load();
+    load(page);
   };
 
   return (
@@ -296,6 +308,42 @@ export default function AnnouncementsPanel() {
             ))
           )}
         </div>
+
+        {total > pageSize ? (
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-white/60">
+            <span>
+              Page {page} of {Math.max(Math.ceil(total / pageSize), 1)}
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => load(Math.max(page - 1, 1))}
+                className={`rounded-full border px-3 py-1 text-xs transition ${
+                  page === 1
+                    ? "border-white/10 text-white/30"
+                    : "border-white/20 text-white/80 hover:border-cyan-300"
+                }`}
+                disabled={page === 1}
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  load(Math.min(page + 1, Math.ceil(total / pageSize)))
+                }
+                className={`rounded-full border px-3 py-1 text-xs transition ${
+                  page >= Math.ceil(total / pageSize)
+                    ? "border-white/10 text-white/30"
+                    : "border-white/20 text-white/80 hover:border-cyan-300"
+                }`}
+                disabled={page >= Math.ceil(total / pageSize)}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

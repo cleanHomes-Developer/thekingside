@@ -18,12 +18,21 @@ export const metadata: Metadata = {
     siteName: "The King Side",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "https://thekingside.com/og/home.svg",
+        width: 1200,
+        height: 630,
+        alt: "The King Side competitive chess tournaments",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Competitive Chess Tournaments",
     description:
       "The King Side runs elite chess tournaments with live brackets, verified outcomes, and transparent prize pools.",
+    images: ["https://thekingside.com/og/home.svg"],
   },
 };
 

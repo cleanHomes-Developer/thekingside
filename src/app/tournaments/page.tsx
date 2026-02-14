@@ -24,6 +24,8 @@ export const metadata: Metadata = {
       "Browse upcoming chess tournaments, brackets, and entry details on The King Side.",
   },
 };
+
+export const revalidate = 30;
 import { prisma } from "@/lib/db";
 import { enforceTournamentLocks } from "@/lib/tournaments/lock";
 import { formatCurrency, formatDateTime } from "@/lib/format";
@@ -33,7 +35,13 @@ import CountdownBadge from "./CountdownBadge";
 export default async function TournamentsPage({
   searchParams,
 }: {
-  searchParams?: { status?: string; q?: string; tc?: string; fee?: string };
+  searchParams?: {
+    status?: string;
+    q?: string;
+    tc?: string;
+    fee?: string;
+    page?: string;
+  };
 }) {
   try {
     await enforceTournamentLocks();
@@ -46,6 +54,9 @@ export default async function TournamentsPage({
   const queryText = searchParams?.q?.trim() ?? "";
   const timeControlFilter = searchParams?.tc?.trim() ?? "";
   const feeFilter = searchParams?.fee?.trim() ?? "";
+  const page = Math.max(Number(searchParams?.page ?? "1") || 1, 1);
+  const pageSize = 8;
+  const skip = (page - 1) * pageSize;
   let tournaments: Array<{
     id: string;
     name: string;
@@ -64,36 +75,46 @@ export default async function TournamentsPage({
     slotKey: string | null;
     description: string | null;
   }> = [];
+  let totalCount = 0;
+  let nextTournament: { startDate: Date } | null = null;
   try {
-    tournaments = await prisma.tournament.findMany({
-      where:
-        statusFilter && statusFilter !== "ALL"
-          ? { status: statusFilter as any }
-          : undefined,
-      orderBy: { startDate: "asc" },
-    });
+    const where = {
+      ...(statusFilter && statusFilter !== "ALL"
+        ? { status: statusFilter as any }
+        : {}),
+      ...(queryText
+        ? { name: { contains: queryText, mode: "insensitive" as const } }
+        : {}),
+      ...(timeControlFilter ? { timeControl: timeControlFilter } : {}),
+      ...(feeFilter === "free"
+        ? { entryFee: { lte: 0 } }
+        : feeFilter === "paid"
+          ? { entryFee: { gt: 0 } }
+          : {}),
+    };
+    const [items, count, upcoming] = await prisma.$transaction([
+      prisma.tournament.findMany({
+        where,
+        orderBy: { startDate: "asc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.tournament.count({ where }),
+      prisma.tournament.findFirst({
+        where: { startDate: { gt: new Date() } },
+        orderBy: { startDate: "asc" },
+        select: { startDate: true },
+      }),
+    ]);
+    tournaments = items;
+    totalCount = count;
+    nextTournament = upcoming;
   } catch {
     tournaments = [];
+    totalCount = 0;
+    nextTournament = null;
   }
-
-  const filtered = tournaments.filter((tournament) => {
-    if (queryText && !tournament.name.toLowerCase().includes(queryText.toLowerCase())) {
-      return false;
-    }
-    if (timeControlFilter && tournament.timeControl !== timeControlFilter) {
-      return false;
-    }
-    if (feeFilter === "free" && tournament.entryFee && Number(tournament.entryFee) > 0) {
-      return false;
-    }
-    if (feeFilter === "paid" && (!tournament.entryFee || Number(tournament.entryFee) === 0)) {
-      return false;
-    }
-    return true;
-  });
-  const nextTournament = tournaments.find(
-    (tournament) => new Date(tournament.startDate).getTime() > Date.now(),
-  );
+  const filtered = tournaments;
   const statuses = [
     { label: "All", value: "ALL" },
     { label: "Registration", value: "REGISTRATION" },
@@ -102,6 +123,16 @@ export default async function TournamentsPage({
     { label: "Cancelled", value: "CANCELLED" },
   ];
   const activeStatus = statusFilter ?? "ALL";
+  const totalPages = Math.max(Math.ceil(totalCount / pageSize), 1);
+  const buildPageLink = (nextPage: number) => {
+    const params = new URLSearchParams();
+    if (activeStatus && activeStatus !== "ALL") params.set("status", activeStatus);
+    if (queryText) params.set("q", queryText);
+    if (timeControlFilter) params.set("tc", timeControlFilter);
+    if (feeFilter) params.set("fee", feeFilter);
+    params.set("page", nextPage.toString());
+    return `/tournaments?${params.toString()}`;
+  };
 
   return (
     <div className="min-h-screen px-6 py-16 text-white">
@@ -252,6 +283,36 @@ export default async function TournamentsPage({
             ))}
           </div>
         )}
+
+        {totalPages > 1 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-white/60">
+            <span>
+              Page {page} of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <Link
+                href={buildPageLink(Math.max(page - 1, 1))}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  page === 1
+                    ? "border-white/10 text-white/30 pointer-events-none"
+                    : "border-white/20 text-white/80 hover:border-cyan-300"
+                }`}
+              >
+                Previous
+              </Link>
+              <Link
+                href={buildPageLink(Math.min(page + 1, totalPages))}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  page === totalPages
+                    ? "border-white/10 text-white/30 pointer-events-none"
+                    : "border-white/20 text-white/80 hover:border-cyan-300"
+                }`}
+              >
+                Next
+              </Link>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

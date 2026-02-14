@@ -17,6 +17,7 @@ export async function GET(_: Request, { params }: RouteContext) {
     }),
     prisma.match.findMany({
       where: { tournamentId: params.id },
+      select: { player1Id: true, player2Id: true, result: true },
     }),
   ]);
 

@@ -4,16 +4,27 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { isRequestFromAllowedOrigin } from "@/lib/auth/origin";
 import { getRequestMeta, logAuditEvent } from "@/lib/audit";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const tickets = await prisma.supportTicket.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { user: true, tournament: true },
-  });
+  const page = Math.max(Number(request.nextUrl.searchParams.get("page") ?? "1") || 1, 1);
+  const limit = Math.min(
+    Math.max(Number(request.nextUrl.searchParams.get("limit") ?? "25") || 25, 1),
+    100,
+  );
+  const skip = (page - 1) * limit;
+  const [tickets, total] = await prisma.$transaction([
+    prisma.supportTicket.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { user: true, tournament: true },
+      skip,
+      take: limit,
+    }),
+    prisma.supportTicket.count(),
+  ]);
 
   return NextResponse.json({
     tickets: tickets.map((ticket) => ({
@@ -26,6 +37,9 @@ export async function GET() {
       status: ticket.status,
       createdAt: ticket.createdAt.toISOString(),
     })),
+    page,
+    total,
+    pageSize: limit,
   });
 }
 

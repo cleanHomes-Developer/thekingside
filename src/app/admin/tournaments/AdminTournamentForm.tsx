@@ -81,6 +81,18 @@ export default function AdminTournamentForm({
       <h2 className="text-lg font-semibold text-cyan-200">
         Create tournament
       </h2>
+      <div className="rounded-lg border border-white/10 bg-[#0b1426] p-3 text-xs text-white/70">
+        <p className="text-[11px] uppercase tracking-[0.25em] text-white/40">
+          Simple flow
+        </p>
+        <p className="mt-2">
+          Create the event, players register, check-in opens 20 minutes before
+          start, and the bracket auto-locks 2 minutes before start.
+        </p>
+        <p className="mt-1 text-white/50">
+          Swiss round 1 and Lichess games are created automatically at lock.
+        </p>
+      </div>
       {isFreeSeason ? (
         <p className="rounded-lg border border-cyan-400/30 bg-[rgba(15,23,42,0.7)] px-3 py-2 text-xs text-cyan-100">
           Free season is active. Entry fees are forced to $0 and new prize
@@ -143,23 +155,6 @@ export default function AdminTournamentForm({
             className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
           />
         </div>
-        <div>
-          <label className="text-sm text-white/70" htmlFor="minPlayers">
-            Min players
-          </label>
-          <input
-            id="minPlayers"
-            name="minPlayers"
-            type="number"
-            min={2}
-            required
-            value={form.minPlayers}
-            onChange={(event) =>
-              setForm((prev) => ({ ...prev, minPlayers: event.target.value }))
-            }
-            className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
-          />
-        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -197,24 +192,6 @@ export default function AdminTournamentForm({
           />
         </div>
         <div>
-          <label className="text-sm text-white/70" htmlFor="endDate">
-            End date
-          </label>
-          <input
-            id="endDate"
-            name="endDate"
-            type="datetime-local"
-            value={form.endDate}
-            onChange={(event) =>
-              setForm((prev) => ({ ...prev, endDate: event.target.value }))
-            }
-            className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <div>
           <label className="text-sm text-white/70" htmlFor="timeControl">
             Time control
           </label>
@@ -229,51 +206,94 @@ export default function AdminTournamentForm({
             placeholder="5+3"
           />
         </div>
-        <div>
-          <label className="text-sm text-white/70" htmlFor="seriesKey">
-            Series key
-          </label>
-          <input
-            id="seriesKey"
-            name="seriesKey"
-            value={form.seriesKey}
-            onChange={(event) =>
-              setForm((prev) => ({ ...prev, seriesKey: event.target.value }))
-            }
-            className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="text-sm text-white/70" htmlFor="slotKey">
-            Slot key
-          </label>
-          <input
-            id="slotKey"
-            name="slotKey"
-            value={form.slotKey}
-            onChange={(event) =>
-              setForm((prev) => ({ ...prev, slotKey: event.target.value }))
-            }
-            className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
-          />
-        </div>
       </div>
 
-      <div>
-        <label className="text-sm text-white/70" htmlFor="description">
-          Description
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          rows={3}
-          value={form.description}
-          onChange={(event) =>
-            setForm((prev) => ({ ...prev, description: event.target.value }))
-          }
-          className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
-        />
-      </div>
+      <details className="rounded-2xl border border-white/10 bg-[#0b1426] p-4 text-sm text-white/60">
+        <summary className="cursor-pointer text-xs uppercase tracking-[0.3em] text-white/50">
+          Advanced settings
+        </summary>
+        <p className="mt-2 text-xs text-white/50">
+          Defaults: min players 8, lock at start minus 2 minutes, check-in
+          opens 20 minutes before start.
+        </p>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          <div>
+            <label className="text-sm text-white/70" htmlFor="minPlayers">
+              Min players
+            </label>
+            <input
+              id="minPlayers"
+              name="minPlayers"
+              type="number"
+              min={2}
+              required
+              value={form.minPlayers}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, minPlayers: event.target.value }))
+              }
+              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-white/70" htmlFor="endDate">
+              End date
+            </label>
+            <input
+              id="endDate"
+              name="endDate"
+              type="datetime-local"
+              value={form.endDate}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, endDate: event.target.value }))
+              }
+              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-white/70" htmlFor="seriesKey">
+              Series key
+            </label>
+            <input
+              id="seriesKey"
+              name="seriesKey"
+              value={form.seriesKey}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, seriesKey: event.target.value }))
+              }
+              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-white/70" htmlFor="slotKey">
+              Slot key
+            </label>
+            <input
+              id="slotKey"
+              name="slotKey"
+              value={form.slotKey}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, slotKey: event.target.value }))
+              }
+              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
+            />
+          </div>
+          <div className="md:col-span-3">
+            <label className="text-sm text-white/70" htmlFor="description">
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows={3}
+              value={form.description}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, description: event.target.value }))
+              }
+              className="mt-2 w-full rounded-lg border border-white/10 bg-slate-950/60 px-4 py-2 text-white focus:border-cyan-300 focus:outline-none"
+            />
+          </div>
+        </div>
+      </details>
 
       {error ? (
         <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">

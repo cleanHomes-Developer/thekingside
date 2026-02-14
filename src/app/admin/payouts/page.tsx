@@ -5,16 +5,29 @@ import { requireAdmin } from "@/lib/auth/guards";
 import AdminPayoutTable from "./AdminPayoutTable";
 import { formatCurrency } from "@/lib/format";
 
-export default async function AdminPayoutsPage() {
+export default async function AdminPayoutsPage({
+  searchParams,
+}: {
+  searchParams?: { page?: string };
+}) {
   const admin = await requireAdmin();
   if (!admin) {
     redirect("/dashboard");
   }
 
-  const payouts = await prisma.payout.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { user: true, tournament: true },
-  });
+  const page = Math.max(Number(searchParams?.page ?? "1") || 1, 1);
+  const pageSize = 25;
+  const skip = (page - 1) * pageSize;
+  const [payouts, total] = await prisma.$transaction([
+    prisma.payout.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { user: true, tournament: true },
+      skip,
+      take: pageSize,
+    }),
+    prisma.payout.count(),
+  ]);
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
 
   return (
     <div className="min-h-screen px-6 py-16 text-white">
@@ -49,6 +62,36 @@ export default async function AdminPayoutsPage() {
             }))}
           />
         </div>
+
+        {totalPages > 1 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-white/60">
+            <span>
+              Page {page} of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <Link
+                href={`/admin/payouts?page=${Math.max(page - 1, 1)}`}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  page === 1
+                    ? "border-white/10 text-white/30 pointer-events-none"
+                    : "border-white/20 text-white/80 hover:border-cyan-300"
+                }`}
+              >
+                Previous
+              </Link>
+              <Link
+                href={`/admin/payouts?page=${Math.min(page + 1, totalPages)}`}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  page === totalPages
+                    ? "border-white/10 text-white/30 pointer-events-none"
+                    : "border-white/20 text-white/80 hover:border-cyan-300"
+                }`}
+              >
+                Next
+              </Link>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

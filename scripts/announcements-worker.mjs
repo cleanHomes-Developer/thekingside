@@ -198,8 +198,34 @@ const worker = new Worker(
   { connection },
 );
 
+async function logQueueFailure(job, err) {
+  try {
+    await prisma.auditLog.create({
+      data: {
+        action: "QUEUE_FAILURE",
+        entityType: "Queue",
+        entityId: job?.id?.toString() ?? null,
+        afterState: {
+          queue: QUEUE_NAME,
+          jobName: job?.name ?? null,
+          attemptsMade: job?.attemptsMade ?? null,
+          error: err?.message ?? String(err),
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Failed to record queue failure", error);
+  }
+}
+
 worker.on("failed", (job, err) => {
   console.error("Announcement job failed", job?.id, err);
+  logQueueFailure(job, err);
+});
+
+worker.on("error", (err) => {
+  console.error("Announcement worker error", err);
+  logQueueFailure(null, err);
 });
 
 console.log("Announcements worker running...");

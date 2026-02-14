@@ -88,12 +88,19 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return { error: "Tournament entry fee is invalid" } as const;
     }
 
+    const checkInOpensAt = new Date(tournament.startDate);
+    checkInOpensAt.setMinutes(checkInOpensAt.getMinutes() - 20);
+    const checkInClosesAt = tournament.lockAt;
+    const shouldAutoCheckIn =
+      now >= checkInOpensAt && now <= checkInClosesAt && isSeatAvailable;
+
     const entryStatus = isFreeSeason ? "CONFIRMED" : "PENDING";
     const entry = await tx.entry.create({
       data: {
         userId: user.id,
         tournamentId: tournament.id,
         status: isSeatAvailable ? entryStatus : "WAITLIST",
+        checkedInAt: shouldAutoCheckIn ? now : undefined,
         ...(isFreeSeason && isSeatAvailable
           ? {
               paidAt: new Date(),

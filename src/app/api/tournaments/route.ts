@@ -21,17 +21,31 @@ export async function GET(request: NextRequest) {
   const status = statusParam
     ? tournamentStatusSchema.safeParse(statusParam)
     : null;
+  const pageParam = request.nextUrl.searchParams.get("page");
+  const limitParam = request.nextUrl.searchParams.get("limit");
+  const page = Math.max(Number(pageParam ?? "1") || 1, 1);
+  const limit = Math.min(Math.max(Number(limitParam ?? "50") || 50, 1), 100);
+  const skip = (page - 1) * limit;
   if (statusParam && !status?.success) {
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
 
-  const tournaments = await prisma.tournament.findMany({
-    where: status?.success ? { status: status.data } : undefined,
-    orderBy: { startDate: "asc" },
-  });
+  const where = status?.success ? { status: status.data } : undefined;
+  const [tournaments, total] = await prisma.$transaction([
+    prisma.tournament.findMany({
+      where,
+      orderBy: { startDate: "asc" },
+      skip,
+      take: limit,
+    }),
+    prisma.tournament.count({ where }),
+  ]);
 
   return NextResponse.json({
     tournaments: tournaments.map(serializeTournament),
+    page,
+    total,
+    pageSize: limit,
   });
 }
 

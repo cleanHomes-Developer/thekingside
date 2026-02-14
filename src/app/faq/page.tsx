@@ -1,6 +1,44 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
+export const metadata: Metadata = {
+  title: "Chess Tournament FAQ",
+  description:
+    "Answers to common questions about Swiss chess tournaments, time controls, payouts, and fair play on The King Side.",
+  keywords: [
+    "chess tournament faq",
+    "Swiss system chess",
+    "online chess tournaments",
+    "chess time control",
+    "chess prize pool",
+    "verified payouts",
+  ],
+  alternates: {
+    canonical: "/faq",
+  },
+  openGraph: {
+    title: "Chess Tournament FAQ",
+    description:
+      "Answers to common questions about Swiss chess tournaments, time controls, payouts, and fair play on The King Side.",
+    url: "https://thekingside.com/faq",
+    siteName: "The King Side",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Chess Tournament FAQ",
+    description:
+      "Answers to common questions about Swiss chess tournaments, time controls, payouts, and fair play on The King Side.",
+  },
+};
+
 const faqs = [
+  {
+    question: "What is The King Side?",
+    answer:
+      "The King Side is a competitive chess tournament league with scheduled events, Swiss pairings, and verified rewards.",
+  },
   {
     question: "How do tournaments work?",
     answer:
@@ -25,6 +63,11 @@ const faqs = [
     question: "What happens if there is a draw?",
     answer:
       "Draws are recorded and count as half points in Swiss standings. Tie-breaks use Buchholz and Sonneborn-Berger.",
+  },
+  {
+    question: "What time controls are used?",
+    answer:
+      "Time controls are announced per tournament. Common formats include 3+2, 5+5, and 10+0.",
   },
   {
     question: "Can I report suspicious play?",
@@ -60,8 +103,8 @@ export default function FaqPage() {
           </p>
           <h1 className="text-3xl font-semibold">Frequently asked questions</h1>
           <p className="text-white/60">
-            Answers to common questions about tournaments, payouts, and fair
-            play.
+            Answers about online chess tournaments, Swiss pairings, time
+            controls, and verified payouts.
           </p>
         </header>
 

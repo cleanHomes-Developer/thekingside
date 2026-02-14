@@ -8,7 +8,7 @@ type SearchParams = {
   action?: string;
   entityType?: string;
   userId?: string;
-  cursor?: string;
+  page?: string;
 };
 
 function toText(value: unknown) {
@@ -47,7 +47,9 @@ export default async function AuditLogsPage({
   const action = toText(searchParams.action).trim();
   const entityType = toText(searchParams.entityType).trim();
   const userId = toText(searchParams.userId).trim();
-  const cursor = toText(searchParams.cursor).trim();
+  const page = Math.max(Number(searchParams.page ?? "1") || 1, 1);
+  const pageSize = 50;
+  const skip = (page - 1) * pageSize;
 
   const where = {
     ...(action
@@ -68,16 +70,16 @@ export default async function AuditLogsPage({
       : {}),
   };
 
-  const logs = await prisma.auditLog.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    take: 51,
-    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-  });
-
-  const hasNext = logs.length > 50;
-  const items = hasNext ? logs.slice(0, 50) : logs;
-  const nextCursor = hasNext ? items[items.length - 1]?.id : null;
+  const [items, total] = await prisma.$transaction([
+    prisma.auditLog.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: pageSize,
+    }),
+    prisma.auditLog.count({ where }),
+  ]);
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
 
   const query = new URLSearchParams();
   if (q) query.set("q", q);
@@ -194,19 +196,41 @@ export default async function AuditLogsPage({
           </table>
         </div>
 
-        {nextCursor ? (
-          <div>
-            {(() => {
-              query.set("cursor", nextCursor);
-              return (
-                <Link
-                  href={`/admin/audit-logs?${query.toString()}`}
-                  className="rounded-full border border-white/20 px-4 py-2 text-sm text-white/80 hover:border-cyan-300"
-                >
-                  Next page
-                </Link>
-              );
-            })()}
+        {totalPages > 1 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-white/60">
+            <span>
+              Page {page} of {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <Link
+                href={`/admin/audit-logs?${(() => {
+                  const params = new URLSearchParams(query);
+                  params.set("page", Math.max(page - 1, 1).toString());
+                  return params.toString();
+                })()}`}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  page === 1
+                    ? "border-white/10 text-white/30 pointer-events-none"
+                    : "border-white/20 text-white/80 hover:border-cyan-300"
+                }`}
+              >
+                Previous
+              </Link>
+              <Link
+                href={`/admin/audit-logs?${(() => {
+                  const params = new URLSearchParams(query);
+                  params.set("page", Math.min(page + 1, totalPages).toString());
+                  return params.toString();
+                })()}`}
+                className={`rounded-full border px-4 py-2 text-sm transition ${
+                  page === totalPages
+                    ? "border-white/10 text-white/30 pointer-events-none"
+                    : "border-white/20 text-white/80 hover:border-cyan-300"
+                }`}
+              >
+                Next
+              </Link>
+            </div>
           </div>
         ) : null}
       </div>
