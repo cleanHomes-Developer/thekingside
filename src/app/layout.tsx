@@ -174,7 +174,7 @@ export default async function RootLayout({
         key={link.href}
         href={link.href}
         className={
-          link.variant === "admin"
+          (link as any).variant === "admin"
             ? "rounded-full border border-cyan-400/40 px-3 py-1 text-cyan-200 transition hover:border-cyan-300"
             : "rounded-full border border-white/10 px-3 py-1 transition hover:border-cyan-300 hover:text-white"
         }

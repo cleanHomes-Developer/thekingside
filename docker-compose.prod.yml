@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: thekingside-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: thekingside
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - thekingside-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: thekingside-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - thekingside-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: thekingside-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-changeme}@postgres:5432/thekingside
+      REDIS_URL: redis://redis:6379
+      NEXT_PUBLIC_APP_URL: ${APP_URL:-http://localhost:3000}
+      AUTH_SECRET: ${AUTH_SECRET}
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-}
+      SEASON_MODE: ${SEASON_MODE:-free}
+      FREE_PRIZE_POOL: ${FREE_PRIZE_POOL:-100}
+      PRIZE_MODE: ${PRIZE_MODE:-gift_card}
+      SPONSORSHIP_ENABLED: ${SPONSORSHIP_ENABLED:-false}
+      SPONSOR_SLOTS: ${SPONSOR_SLOTS:-4}
+      NEXT_PUBLIC_SEASON_MODE: ${SEASON_MODE:-free}
+      NEXT_PUBLIC_FREE_PRIZE_POOL: ${FREE_PRIZE_POOL:-100}
+      LICHESS_BASE_URL: ${LICHESS_BASE_URL:-https://lichess.org}
+      LICHESS_CLIENT_ID: ${LICHESS_CLIENT_ID:-}
+      LICHESS_CLIENT_SECRET: ${LICHESS_CLIENT_SECRET:-}
+      LICHESS_PLATFORM_TOKEN: ${LICHESS_PLATFORM_TOKEN:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_CONNECT_CLIENT_ID: ${STRIPE_CONNECT_CLIENT_ID:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - thekingside-network
+    command: sh -c "npx prisma migrate deploy && node server.js"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: thekingside-worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-changeme}@postgres:5432/thekingside
+      REDIS_URL: redis://redis:6379
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-}
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - thekingside-network
+    command: node scripts/announcements-worker.mjs
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  thekingside-network:
+    driver: bridge

@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
       data: {
         userId: user.id,
         tournamentId: tournamentId ?? null,
-        subject,
-        description,
+        subject: subject!,
+        description: description!,
       },
     });
 

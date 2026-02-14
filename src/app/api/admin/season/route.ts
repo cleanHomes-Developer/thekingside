@@ -11,7 +11,6 @@ function serializeSeasonConfig(config: Awaited<ReturnType<typeof getSeasonConfig
     return null;
   }
   return {
-    id: config.id,
     mode: config.mode,
     freePrizePool: config.freePrizePool?.toString?.() ?? config.freePrizePool,
     prizeMode: config.prizeMode,

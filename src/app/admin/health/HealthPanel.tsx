@@ -102,7 +102,7 @@ export default function HealthPanel() {
           <p className="mt-2 text-xs text-white/60">
             Latency:{" "}
             {status?.redis.latencyMs !== null
-              ? `${status.redis.latencyMs}ms`
+              ? `${status?.redis.latencyMs}ms`
               : "n/a"}
           </p>
           {status?.redis.message ? (

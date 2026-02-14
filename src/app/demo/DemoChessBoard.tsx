@@ -41,7 +41,7 @@ export default function DemoChessBoard() {
   const [botColor, setBotColor] = useState<BotColor>("b");
   const [status, setStatus] = useState(getGameStatus(game));
   const [isBotThinking, setIsBotThinking] = useState(false);
-  const [timeControl, setTimeControl] = useState(TIME_CONTROLS[1]);
+  const [timeControl, setTimeControl] = useState<typeof TIME_CONTROLS[number]>(TIME_CONTROLS[1]);
   const [botLevel, setBotLevel] = useState(BOT_LEVELS[2]);
   const [engineReady, setEngineReady] = useState(false);
   const [engineThinking, setEngineThinking] = useState(false);

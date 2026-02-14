@@ -171,7 +171,7 @@ export default function PlayClient() {
     }
     const AudioContextClass =
       typeof window !== "undefined"
-        ? window.AudioContext || window.webkitAudioContext
+        ? window.AudioContext || (window as any).webkitAudioContext
         : null;
     if (!AudioContextClass) {
       return;

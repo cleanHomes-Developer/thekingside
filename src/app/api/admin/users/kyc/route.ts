@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
         kycVerifiedAt: nextVerifiedAt,
       },
       create: {
-        userId: payload.userId,
-        kycStatus: payload.kycStatus,
+        userId: payload.userId!,
+        kycStatus: payload.kycStatus!,
         kycVerifiedAt: nextVerifiedAt,
       },
     });

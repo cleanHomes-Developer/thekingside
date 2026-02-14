@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
             expand: ["charges.data.balance_transaction"],
           },
         );
-        const charge = paymentIntent.charges?.data?.[0];
+        const charge = (paymentIntent as any).charges?.data?.[0];
         const balanceTransaction = charge?.balance_transaction as
           | Stripe.BalanceTransaction
           | null;

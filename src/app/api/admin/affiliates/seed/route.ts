@@ -25,8 +25,8 @@ export async function POST(request: NextRequest) {
         tx.affiliateProgram.create({
           data: {
             name: program.name,
-            category: program.category,
-            commissionType: program.commissionType,
+            category: program.category as any,
+            commissionType: program.commissionType as any,
             commissionRange: program.commissionRange,
             cookieDuration: program.cookieDuration,
             notes: program.notes ?? undefined,

@@ -252,7 +252,7 @@ export default function AnnouncementsPanel() {
           </div>
           <button
             type="button"
-            onClick={load}
+            onClick={() => load()}
             className="rounded-full border border-white/20 px-3 py-1 text-xs text-white/70 hover:border-cyan-300"
           >
             Refresh

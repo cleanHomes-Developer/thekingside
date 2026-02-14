@@ -328,7 +328,6 @@ export default function AdminTournamentEditForm({
           />
         </div>
       </div>
-      </div>
 
       <details className="rounded-2xl border border-white/10 bg-[#0b1426] p-4 text-sm text-white/60">
         <summary className="cursor-pointer text-xs uppercase tracking-[0.3em] text-white/50">
