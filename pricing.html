@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الأسعار · ميزان Legal AI</title>
+<meta name="description" content="خطط تسعير ميزان — ابدأ مجاناً وارقَ إلى الخطة المناسبة لمكتبك أو مؤسستك.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/meezan.css">
+<style>
+/* ── PAGE-SPECIFIC ── */
+.ph-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(89,189,230,.14);border:1px solid rgba(89,189,230,.28);border-radius:var(--r-full);padding:7px 18px;font-size:13px;font-weight:600;color:var(--cyan);margin-bottom:22px}
+.ph-currency{display:inline-flex;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-full);padding:4px;gap:4px;margin-bottom:10px}
+.curr-btn{padding:8px 22px;border-radius:var(--r-full);font-size:14px;font-weight:600;color:rgba(255,255,255,.6);transition:all .2s;font-family:inherit;cursor:pointer;border:none;background:none}
+.curr-btn.on{background:white;color:var(--navy-dark)}
+/* Pricing cards */
+.pricing-sec{padding:60px 0 80px;background:var(--gray-1)}
+.pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.plan-card{background:var(--white);border-radius:var(--r-xl);padding:36px 28px;border:1.5px solid var(--gray-3);position:relative;transition:all .3s}
+.plan-card:hover{box-shadow:var(--sh-card);transform:translateY(-4px)}
+.plan-card.featured{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(89,189,230,.12)}
+.popular-badge{position:absolute;top:-14px;inset-inline-start:50%;transform:translateX(50%);background:var(--cyan-vivid);color:white;font-size:12px;font-weight:700;padding:4px 16px;border-radius:var(--r-full);white-space:nowrap}
+.enterprise-card{background:var(--grad-card);border-color:rgba(245,181,68,.3)}
+.plan-name{font-size:18px;font-weight:800;color:var(--navy);margin-bottom:6px;letter-spacing:-.3px}
+.enterprise-card .plan-name{color:var(--gold)}
+.plan-price{font-size:42px;font-weight:800;color:var(--navy);line-height:1;margin-bottom:4px}
+.enterprise-card .plan-price{color:white}
+.plan-price span{font-size:18px;font-weight:500;color:var(--gray-4)}
+.enterprise-card .plan-price span{color:rgba(255,255,255,.5)}
+.plan-jod{font-size:14px;color:var(--gray-4);margin-bottom:6px}
+.enterprise-card .plan-jod{color:rgba(255,255,255,.5)}
+.plan-desc{font-size:14px;color:var(--text-body);line-height:1.6;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--gray-3);min-height:60px}
+.enterprise-card .plan-desc{color:rgba(255,255,255,.65);border-color:rgba(255,255,255,.1)}
+.plan-feat-list{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.pf{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-body);flex-direction:row-reverse}
+.enterprise-card .pf{color:rgba(255,255,255,.8)}
+.pf-ic{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.pf-ic.yes{background:rgba(30,158,107,.15)}
+.pf-ic.yes svg{color:var(--green)}
+.enterprise-card .pf-ic.yes{background:rgba(245,181,68,.15)}
+.enterprise-card .pf-ic.yes svg{color:var(--gold)}
+/* Feature table */
+.table-sec{padding:20px 0 80px}
+.table-wrap{background:var(--white);border-radius:var(--r-xl);border:1.5px solid var(--gray-3);overflow:hidden;box-shadow:0 4px 24px rgba(6,68,114,.06)}
+.feat-table{width:100%;border-collapse:collapse}
+.feat-table th{padding:20px 18px;font-size:13px;font-weight:700;color:var(--navy);background:var(--white);text-align:center;border-inline-start:1px solid var(--gray-3)}
+.feat-table th:first-child{text-align:right;border-inline-start:none;width:38%}
+.feat-table th.th-featured{background:rgba(89,189,230,.05);color:var(--cyan-vivid)}
+.feat-table th.th-enterprise{background:rgba(6,68,114,.04);color:var(--navy-dark)}
+.feat-table td{padding:13px 18px;font-size:14px;color:var(--text-body);border-top:1px solid var(--gray-2);text-align:center;border-inline-start:1px solid var(--gray-2)}
+.feat-table td:first-child{text-align:right;border-inline-start:none;font-weight:500;color:var(--navy)}
+.feat-table td.featured-col{background:rgba(89,189,230,.03)}
+.feat-table td.enterprise-col{background:rgba(6,68,114,.02)}
+.feat-table tr:hover td{background:var(--gray-1)}
+.feat-table tr:hover td.featured-col{background:rgba(89,189,230,.07)}
+.feat-table tr:hover td.enterprise-col{background:rgba(6,68,114,.05)}
+.section-row td{padding:18px 18px 8px;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan-vivid);background:var(--gray-1)!important;border-top:2px solid var(--gray-3)!important}
+.section-row td:first-child{text-align:right}
+.ic-yes{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(30,158,107,.12)}
+.ic-yes svg{color:var(--green)}
+.ic-no{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px}
+.ic-no svg{color:var(--gray-4)}
+.ic-beta{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:var(--r-full);background:rgba(245,181,68,.12);border:1px solid rgba(245,181,68,.3);color:var(--gold)}
+.ic-limited{display:inline-block;font-size:11px;font-weight:600;color:var(--cyan-vivid)}
+/* FAQ */
+.faq-sec{padding:60px 0 80px}
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:52px}
+.faq-item{background:var(--white);border-radius:var(--r-lg);border:1.5px solid var(--gray-3);padding:28px;cursor:pointer;transition:all .2s}
+.faq-item:hover,.faq-item.open{border-color:var(--cyan);box-shadow:var(--sh-soft)}
+.faq-q{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:0;display:flex;align-items:flex-start;gap:10px;flex-direction:row-reverse;justify-content:space-between}
+.faq-a{font-size:14px;color:var(--text-body);line-height:1.75;margin-top:12px;display:none}
+.faq-item.open .faq-a{display:block}
+.faq-icon{color:var(--gold);flex-shrink:0;font-size:20px;line-height:1}
+/* CTA */
+.cta-sec{padding:80px 0;background:var(--navy-dark);text-align:center;position:relative;overflow:hidden}
+.cta-sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(89,189,230,.12) 0%,transparent 70%)}
+.cta-title{font-size:42px;font-weight:800;color:white;margin-bottom:16px;position:relative}
+.cta-sub{font-size:18px;color:rgba(255,255,255,.65);margin-bottom:36px;position:relative}
+.cta-btns{display:flex;align-items:center;justify-content:center;gap:14px;flex-direction:row-reverse;position:relative}
+/* Responsive */
+@media(max-width:1024px){.pricing-grid{grid-template-columns:1fr 1fr;gap:16px}}
+@media(max-width:768px){
+  .pricing-grid{grid-template-columns:1fr}
+  .faq-grid{grid-template-columns:1fr}
+  .feat-table th,.feat-table td{padding:10px 10px;font-size:12px}
+  .table-wrap{overflow-x:auto}
+}
+</style>
+</head>
+<body>
+<header class="site-header dark" id="site-hdr">
+  <div class="container">
+    <nav class="nav-wrap">
+      <a class="nav-logo" href="index.html">
+        <div class="logo-disc"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div class="logo-txt"><div class="logo-ar">ميزان</div><div class="logo-en">Meezan Legal AI</div></div>
+      </a>
+      <div class="nav-links">
+        <a class="nav-lnk" href="index.html">الرئيسية</a>
+        <a class="nav-lnk" href="app.html">المساعد</a>
+        <a class="nav-lnk" href="app.html#research">البحث القانوني</a>
+        <a class="nav-lnk" href="app.html#sharia">الفحص الشرعي</a>
+        <a class="nav-lnk on" href="pricing.html">الأسعار</a>
+        <a class="nav-lnk" href="about.html">عن ميزان</a>
+      </div>
+      <div class="nav-ctas">
+        <a class="nav-login" href="app.html">تسجيل الدخول</a>
+        <a class="btn btn-primary btn-sm" href="app.html">ابدأ مجاناً</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="ph-eyebrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="var(--cyan)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> خطط مصممة للمحترفين القانونيين العرب</div>
+    <h1 class="ph-title">سعر عادل.<br><span style="color:var(--gold)">قيمة استثنائية.</span></h1>
+    <p class="ph-sub">ابدأ مجاناً. لا تحتاج بطاقة ائتمانية. ارقَ إلى الخطة المناسبة حين تحتاج.</p>
+    <div style="display:flex;justify-content:center;margin-bottom:10px">
+      <div class="ph-currency" id="curr-toggle">
+        <button class="curr-btn on" onclick="setCurr('usd')">USD $</button>
+        <button class="curr-btn" onclick="setCurr('jod')">JOD دينار</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing-sec">
+  <div class="container">
+    <div class="pricing-grid">
+      <!-- STARTER -->
+      <div class="plan-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price" id="p-starter">مجاناً<span></span></div>
+        <div class="plan-jod" id="pj-starter">للأبد</div>
+        <div class="plan-desc">للمحامي الذي يريد تجربة ميزان قبل الالتزام</div>
+        <div class="plan-feat-list">
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>مستخدم واحد</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>٥ وثائق شهرياً</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>١٠ استفسارات شهرياً</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>أسئلة عن المستندات</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>الأردن فقط</span></div>
+        </div>
+        <a class="btn btn-ghost btn-block btn-lg" href="app.html">ابدأ مجاناً</a>
+      </div>
+      <!-- PRO -->
+      <div class="plan-card featured">
+        <div class="popular-badge">الأكثر شيوعاً</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price" id="p-pro">$149<span>/شهر</span></div>
+        <div class="plan-jod" id="pj-pro">أو ١١٠ دينار أردني</div>
+        <div class="plan-desc">للمحامي المستقل والشريك الذي يريد كل الأدوات</div>
+        <div class="plan-feat-list">
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>١–٣ مستخدمين</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>٥٠ وثيقة شهرياً</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>٢٢ دولة عربية</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>تقييم مخاطر + بنود مفقودة</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>فحص شرعي + صياغة</span></div>
+        </div>
+        <a class="btn btn-primary btn-block btn-lg" href="app.html">ابدأ تجربة ١٤ يوم</a>
+      </div>
+      <!-- FIRM -->
+      <div class="plan-card">
+        <div class="plan-name">Firm</div>
+        <div class="plan-price" id="p-firm">$399<span>/شهر</span></div>
+        <div class="plan-jod" id="pj-firm">أو ٢٩٠ دينار أردني</div>
+        <div class="plan-desc">للمكاتب القانونية والأقسام الحقوقية في الشركات</div>
+        <div class="plan-feat-list">
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>حتى ١٠ مستخدمين</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>وثائق غير محدودة</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>كل أدوات Pro</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>التمويل الإسلامي + الوقف</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>دعم هاتفي بالعربية</span></div>
+        </div>
+        <a class="btn btn-gold btn-block btn-lg" href="app.html">ابدأ تجربة ١٤ يوم</a>
+      </div>
+      <!-- ENTERPRISE -->
+      <div class="plan-card enterprise-card">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">تسعير<span style="font-size:22px;font-weight:600;color:rgba(255,255,255,.6)"> مخصص</span></div>
+        <div class="plan-jod" style="color:rgba(255,255,255,.4)">للشركات والمؤسسات الكبرى</div>
+        <div class="plan-desc">للبنوك والجهات الحكومية والمكاتب متعددة الفروع</div>
+        <div class="plan-feat-list">
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>مستخدمون غير محدودون</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>كل الميزات + API</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>ضمان إقامة البيانات</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>White-label متاح</span></div>
+          <div class="pf"><div class="pf-ic yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><span>SLA 99.9% + دعم ٤ ساعات</span></div>
+        </div>
+        <a class="btn btn-block btn-lg" href="about.html#contact" style="background:rgba(245,181,68,.15);border:1.5px solid rgba(245,181,68,.4);color:var(--gold-light);display:flex;align-items:center;justify-content:center">تواصل معنا</a>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--gray-4)">جميع الأسعار بالدولار الأمريكي · الدينار الأردني (JOD) · متاح أيضاً بالدرهم الإماراتي والريال السعودي</p>
+  </div>
+</section>
+
+<!-- FEATURE TABLE -->
+<section class="table-sec">
+  <div class="container">
+    <div class="sec-hd" style="margin-bottom:40px">
+      <span class="sec-eyebrow">مقارنة تفصيلية</span><div class="gold-bar"></div>
+      <h2 class="t-section c-navy">كل ميزة في مكانها</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="feat-table">
+        <thead>
+          <tr>
+            <th style="text-align:right;padding:20px 22px">الميزة</th>
+            <th>Starter<br><span style="font-size:11px;font-weight:400;color:var(--gray-4)">مجاناً</span></th>
+            <th class="th-featured">Pro<br><span style="font-size:11px;font-weight:400;color:var(--cyan)">$149 / ١١٠ د.أ.</span></th>
+            <th>Firm<br><span style="font-size:11px;font-weight:400;color:var(--gray-4)">$399 / ٢٩٠ د.أ.</span></th>
+            <th class="th-enterprise">Enterprise<br><span style="font-size:11px;font-weight:400;color:var(--gray-4)">مخصص</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="section-row"><td colspan="5">الحساب والاستخدام</td></tr>
+          <tr><td>عدد المستخدمين</td><td>١</td><td class="featured-col">١–٣</td><td>حتى ١٠</td><td class="enterprise-col">غير محدود</td></tr>
+          <tr><td>الوثائق شهرياً</td><td>٥</td><td class="featured-col">٥٠</td><td>غير محدود</td><td class="enterprise-col">غير محدود</td></tr>
+          <tr><td>الاستفسارات شهرياً</td><td>١٠</td><td class="featured-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>الدول المتاحة</td><td>الأردن فقط</td><td class="featured-col">٢٢ دولة</td><td>٢٢ دولة</td><td class="enterprise-col">٢٢ دولة</td></tr>
+          <tr class="section-row"><td colspan="5">المستندات والعقود</td></tr>
+          <tr><td>أسئلة عن المستند</td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="featured-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>تقييم المخاطر (١–١٠)</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>البنود المفقودة</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>مقارنة العقود / Redline</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr class="section-row"><td colspan="5">الميزات الحصرية العربية</td></tr>
+          <tr><td>الفحص الشرعي</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>التمويل الإسلامي</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-beta">Beta</span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>مراقب الجريدة الرسمية</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr class="section-row"><td colspan="5">إدارة الممارسة القانونية</td></tr>
+          <tr><td>إدارة القضايا والملفات</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-limited">محدود</span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>تتبع المواعيد والتقادم</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>الفوترة وتتبع الوقت</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr class="section-row"><td colspan="5">المؤسسات والتكامل</td></tr>
+          <tr><td>API للمطورين</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>White-label</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>ضمان إقامة البيانات</td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="featured-col"><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td><span class="ic-no"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></td><td class="enterprise-col"><span class="ic-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-sec">
+  <div class="container">
+    <div class="sec-hd" style="margin-bottom:0">
+      <span class="sec-eyebrow">الأسئلة الشائعة</span><div class="gold-bar"></div>
+      <h2 class="t-section c-navy">كل ما تريد معرفته</h2>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item"><div class="faq-q"><span>هل يمكنني إلغاء الاشتراك في أي وقت؟</span><span class="faq-icon">+</span></div><div class="faq-a">نعم، يمكنك إلغاء اشتراكك في أي وقت دون رسوم إضافية. ستستمر في الاستفادة من الخطة حتى نهاية فترة الفوترة الحالية.</div></div>
+      <div class="faq-item"><div class="faq-q"><span>هل بياناتي آمنة؟</span><span class="faq-icon">+</span></div><div class="faq-a">نعم. بياناتك مشفرة بالكامل ولا تُستخدم أبداً لتدريب نماذج الذكاء الاصطناعي. نحن نلتزم بمعايير ISO 27001 وGDPR.</div></div>
+      <div class="faq-item"><div class="faq-q"><span>ما الدول المتاحة في الخطة المجانية؟</span><span class="faq-icon">+</span></div><div class="faq-a">الخطة المجانية تغطي الأردن فقط. خطط Pro وFirm وEnterprise تغطي ٢٢ دولة عربية بما فيها الإمارات والسعودية وقطر والكويت.</div></div>
+      <div class="faq-item"><div class="faq-q"><span>هل تتوفر خصومات للمكاتب الكبيرة؟</span><span class="faq-icon">+</span></div><div class="faq-a">نعم، نقدم خصومات خاصة للمكاتب التي تضم أكثر من ١٠ محامين. تواصل معنا للحصول على عرض مخصص.</div></div>
+      <div class="faq-item"><div class="faq-q"><span>هل يدعم ميزان اللغة الإنجليزية؟</span><span class="faq-icon">+</span></div><div class="faq-a">نعم، يدعم ميزان العربية والإنجليزية بشكل كامل. يمكنك الاستفسار بأي لغة والحصول على إجابات بنفس اللغة أو اللغة التي تختارها.</div></div>
+      <div class="faq-item"><div class="faq-q"><span>هل يمكن دمج ميزان مع أنظمتنا الحالية؟</span><span class="faq-icon">+</span></div><div class="faq-a">خطة Enterprise توفر API كاملاً للتكامل مع أنظمة إدارة القضايا وبرامج المحاسبة وأنظمة إدارة الوثائق الموجودة لديكم.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec">
+  <div class="container">
+    <h2 class="cta-title">جاهز للبدء؟</h2>
+    <p class="cta-sub">انضم إلى آلاف المحامين العرب الذين يثقون بميزان</p>
+    <div class="cta-btns">
+      <a class="btn btn-primary btn-lg" href="app.html">ابدأ مجاناً</a>
+      <a class="btn btn-outline btn-lg" href="about.html#contact">تواصل مع فريق المبيعات</a>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="foot-brand-logo"><div class="foot-brand-disc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><span class="foot-brand-name">ميزان</span></div>
+        <p class="foot-brand-desc">منصة الذكاء الاصطناعي القانوني المتخصصة للمحترفين في العالم العربي</p>
+      </div>
+      <div><div class="foot-head">المنصة</div><div class="foot-links"><a class="foot-link" href="app.html">المساعد القانوني</a><a class="foot-link" href="app.html#research">البحث القانوني</a><a class="foot-link" href="app.html#sharia">الفحص الشرعي</a><a class="foot-link" href="pricing.html">الأسعار</a></div></div>
+      <div><div class="foot-head">الشركة</div><div class="foot-links"><a class="foot-link" href="about.html">عن ميزان</a><a class="foot-link" href="about.html#contact">تواصل معنا</a><a class="foot-link" href="#">المدونة</a></div></div>
+      <div><div class="foot-head">تواصل معنا</div><div class="foot-links"><a class="foot-link" href="mailto:hello@meezan.ai" style="direction:ltr;display:block">hello@meezan.ai</a><span class="foot-link" style="direction:ltr;display:block">+962 79 000 1234</span></div></div>
+    </div>
+    <div class="foot-bar">
+      <div class="foot-copy">© 2026 Meezan AI · CyberLaw Ltd · Registered in Jordan</div>
+      <div class="foot-legal"><a href="#">سياسة الخصوصية</a><a href="#">شروط الاستخدام</a></div>
+    </div>
+  </div>
+</footer>
+<script src="js/meezan.js"></script>
+</body>
+</html>

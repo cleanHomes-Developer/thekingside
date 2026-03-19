@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ميزان · منصة الذكاء الاصطناعي القانوني للعرب</title>
+<meta name="description" content="ميزان — منصة الذكاء الاصطناعي القانوني المتخصصة للمحترفين في العالم العربي.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/meezan.css">
+<style>
+/* ── PAGE-SPECIFIC: HERO ── */
+.hero{min-height:100vh;background:var(--grad-hero);display:flex;align-items:center;position:relative;overflow:hidden;padding-top:130px;padding-bottom:80px;color:white}
+.hero-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.bg-ic{position:absolute;color:var(--cyan);opacity:.055;animation:iconFloat 6s ease-in-out infinite}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;position:relative;z-index:1;direction:rtl}
+.hero-title{font-size:70px;font-weight:800;line-height:1.1;letter-spacing:-.025em;color:white;margin-bottom:22px}
+.hero-desc{font-size:22px;color:rgba(255,255,255,.74);margin-bottom:38px;line-height:1.5}
+.hero-ctas{display:flex;align-items:center;gap:16px;flex-wrap:wrap;flex-direction:row-reverse}
+.hero-trust{display:flex;align-items:center;gap:12px;margin-top:30px;color:rgba(255,255,255,.45);font-size:14px;font-weight:500;flex-direction:row-reverse}
+.trust-flags{display:flex;gap:5px;font-size:20px}
+/* Hero card */
+.hero-card{background:rgba(255,255,255,.07);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-xl);padding:30px;box-shadow:var(--sh-card)}
+.hc-head{display:flex;align-items:center;gap:12px;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid rgba(255,255,255,.09);flex-direction:row-reverse}
+.hc-av{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--navy-dark);flex-shrink:0}
+.hc-name{font-size:14px;font-weight:600;color:white}
+.hc-role{font-size:12px;color:var(--cyan)}
+.hc-msg{background:rgba(255,255,255,.07);border-radius:var(--r-md);padding:14px 16px;font-size:15px;color:rgba(255,255,255,.84);margin-bottom:16px;line-height:1.65;direction:rtl}
+.hc-thinking{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--cyan);margin-bottom:16px;direction:ltr}
+.hc-dots{display:flex;gap:4px}
+.hc-d{width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:dp 1.4s ease-in-out infinite}
+.hc-d:nth-child(2){animation-delay:.2s}.hc-d:nth-child(3){animation-delay:.4s}
+.hc-answer{font-size:15px;color:white;line-height:1.78;margin-bottom:16px;direction:rtl}
+.hc-srcs{display:flex;gap:7px;flex-wrap:wrap;flex-direction:row-reverse}
+.hc-src{background:rgba(89,189,230,.14);border:1px solid rgba(89,189,230,.28);border-radius:var(--r-xs);padding:3px 10px;font-size:11px;color:var(--cyan);font-weight:600;direction:ltr}
+/* Stats */
+.stats-sec{background:var(--grad-stats);padding:60px 0}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
+.stat-it{padding:24px;position:relative}
+.stat-it:not(:last-child)::after{content:'';position:absolute;top:20%;bottom:20%;inset-inline-start:0;width:1px;background:rgba(255,255,255,.12)}
+.stat-n{font-size:48px;font-weight:700;color:white;line-height:1;margin-bottom:8px}
+.stat-n.gold{color:var(--gold)}
+.stat-l{font-size:15px;color:rgba(255,255,255,.65)}
+/* Features */
+.feat-sec{padding:100px 0;background:var(--white)}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.feature-card{text-align:center;padding:44px 30px 36px;border-radius:var(--r-lg);border:1.5px solid var(--gray-3);background:var(--white);position:relative;overflow:hidden;transition:all .3s ease}
+.feature-card::before{content:'';position:absolute;top:0;inset-inline:0;height:3px;background:linear-gradient(90deg,var(--cyan) 0%,var(--cyan-bright) 100%);opacity:0;transition:opacity .3s}
+.feature-card:hover{box-shadow:var(--sh-card);border-color:transparent;transform:translateY(-5px)}
+.feature-card:hover::before{opacity:1}
+.fc-icon{width:76px;height:76px;border-radius:var(--r-lg);background:rgba(89,190,231,.08);border:1.5px solid rgba(89,190,231,.22);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;transition:all .3s}
+.feature-card:hover .fc-icon{transform:scale(1.1);filter:brightness(0) invert(1);background:var(--navy);border-color:var(--navy)}
+.fc-title{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:14px}
+.fc-desc{font-size:16px;color:var(--text-body);line-height:1.72}
+.fc-badge{display:inline-block;margin-top:18px;background:rgba(245,181,68,.1);border:1px solid rgba(245,181,68,.3);border-radius:var(--r-full);padding:4px 14px;font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.5px}
+.feature-card.excl{background:var(--grad-card);border-color:rgba(245,181,68,.28)}
+.feature-card.excl::before{background:linear-gradient(90deg,var(--gold) 0%,var(--gold-light) 100%)}
+.feature-card.excl .fc-icon{background:rgba(245,181,68,.1);border-color:rgba(245,181,68,.28)}
+.feature-card.excl:hover .fc-icon{background:var(--gold);border-color:var(--gold);filter:none}
+.feature-card.excl .fc-title{color:white}
+.feature-card.excl .fc-desc{color:rgba(255,255,255,.68)}
+/* How */
+.how-sec{padding:100px 0;background:var(--gray-1)}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:64px}
+.how-step{text-align:center;padding:40px 28px}
+.how-num{width:56px;height:56px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:22px;font-weight:800;color:var(--gold)}
+.how-title{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:12px}
+.how-desc{font-size:15px;color:var(--text-body);line-height:1.75}
+/* Testimonials */
+.test-sec{padding:100px 0;background:var(--white)}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:64px}
+.test-card{padding:36px 30px;border-radius:var(--r-lg);border:1.5px solid var(--gray-3);background:var(--white);transition:all .3s}
+.test-card:hover{box-shadow:var(--sh-card);border-color:transparent;transform:translateY(-4px)}
+.test-stars{display:flex;gap:4px;margin-bottom:18px;direction:ltr;justify-content:flex-end}
+.test-star{color:var(--gold);font-size:16px}
+.test-quote{font-size:16px;color:var(--text-body);line-height:1.8;margin-bottom:22px}
+.test-author{display:flex;align-items:center;gap:12px;flex-direction:row-reverse}
+.test-av{width:42px;height:42px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--gold);flex-shrink:0}
+.test-name{font-size:14px;font-weight:700;color:var(--navy)}
+.test-role{font-size:12px;color:var(--gray-4)}
+/* Trust strip */
+.trust-strip{background:var(--grad-stats);padding:72px 0;text-align:center}
+.trust-logos{display:flex;align-items:center;justify-content:center;gap:56px;flex-wrap:wrap;margin-top:36px;opacity:.7}
+.trust-logo{color:white;font-size:19px;font-weight:700}
+/* CTA */
+.cta-sec{padding:100px 0;background:var(--navy-dark);text-align:center;position:relative;overflow:hidden}
+.cta-sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(89,189,230,.12) 0%,transparent 70%)}
+.cta-title{font-size:48px;font-weight:800;color:white;margin-bottom:20px;position:relative}
+.cta-sub{font-size:20px;color:rgba(255,255,255,.65);margin-bottom:40px;position:relative}
+.cta-btns{display:flex;align-items:center;justify-content:center;gap:16px;flex-direction:row-reverse;position:relative}
+.cta-note{font-size:14px;color:rgba(255,255,255,.35);margin-top:20px;position:relative}
+/* Responsive */
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:1fr;gap:40px}
+  .hero-title{font-size:48px}
+  .feat-grid,.how-grid,.test-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){.hero-title{font-size:38px}}
+</style>
+</head>
+<body>
+<header class="site-header" id="site-hdr">
+  <div class="container">
+    <nav class="nav-wrap">
+      <a class="nav-logo" href="index.html">
+        <div class="logo-disc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div class="logo-txt"><div class="logo-ar">ميزان</div><div class="logo-en">Meezan Legal AI</div></div>
+      </a>
+      <div class="nav-links">
+        <a class="nav-lnk on" href="index.html">الرئيسية</a>
+        <a class="nav-lnk" href="app.html">المساعد</a>
+        <a class="nav-lnk" href="app.html#research">البحث القانوني</a>
+        <a class="nav-lnk" href="app.html#sharia">الفحص الشرعي</a>
+        <a class="nav-lnk" href="pricing.html">الأسعار</a>
+        <a class="nav-lnk" href="about.html">عن ميزان</a>
+      </div>
+      <div class="nav-ctas">
+        <a class="nav-login" href="app.html">تسجيل الدخول</a>
+        <a class="btn btn-primary btn-sm" href="app.html">ابدأ مجاناً</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg">
+    <svg class="bg-ic" style="top:10%;right:7%;animation-delay:0s" width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <svg class="bg-ic" style="top:52%;right:13%;animation-delay:1.6s" width="65" height="65" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <svg class="bg-ic" style="top:16%;left:4%;animation-delay:3.1s" width="108" height="108" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M12 12v10"/></svg>
+    <svg class="bg-ic" style="bottom:18%;left:10%;animation-delay:.8s" width="78" height="78" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+  </div>
+  <div class="container">
+    <div class="hero-grid">
+      <div class="fade-up">
+        <div class="hero-eyebrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="var(--cyan)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> منصة الذكاء الاصطناعي القانوني للعرب</div>
+        <h1 class="hero-title">أهلاً بكم في<br>المنظومة القانونية<br><span class="c-gold">الذكية</span></h1>
+        <p class="hero-desc">كل ما تحتاجه لأداء مهامك القانونية في مكان واحد — مدعوم بالذكاء الاصطناعي والمحتوى القانوني العربي العميق</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary btn-lg" href="app.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>ابدأ مجاناً</a>
+          <a class="btn btn-outline btn-lg" href="#how"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>شاهد العرض</a>
+        </div>
+        <div class="hero-trust">
+          <span>٩+ دول عربية</span><div class="trust-flags">🇯🇴🇦🇪🇸🇦🇶🇦🇰🇼🇧🇭🇪🇬🇱🇧🇮🇶</div><span>يغطي</span>
+        </div>
+      </div>
+      <div class="fade-up fade-up-2">
+        <div class="hero-card">
+          <div class="hc-head"><div><div class="hc-name">أحمد المصري</div><div class="hc-role">محامي · عمّان، الأردن</div></div><div class="hc-av">أح</div></div>
+          <div class="hc-msg">ما مدة التقادم لدعاوى الأجور غير المدفوعة في الأردن؟</div>
+          <div class="hc-thinking"><div class="hc-dots"><div class="hc-d"></div><div class="hc-d"></div><div class="hc-d"></div></div><span>Searching Jordan Labor Law…</span></div>
+          <div class="hc-answer">وفقاً لقانون العمل الأردني <strong>المادة ١٣٤</strong>، تتقادم دعاوى الأجور بمرور <strong>سنة واحدة</strong> من تاريخ استحقاقها.</div>
+          <div class="hc-srcs"><div class="hc-src">قانون العمل م.١٣٤</div><div class="hc-src">ج.ر. ٤٢٦٩ · ١٩٩٦</div><div class="hc-src">تمييز ٢٠١٩/٤٥٦</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats-sec">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-it"><div class="stat-n gold">٩+</div><div class="stat-l">دول عربية مغطاة</div></div>
+      <div class="stat-it"><div class="stat-n">٩٠ألف+</div><div class="stat-l">تشريع وقانون</div></div>
+      <div class="stat-it"><div class="stat-n gold">٤م+</div><div class="stat-l">حكم قضائي</div></div>
+      <div class="stat-it"><div class="stat-n">٢٤/٧</div><div class="stat-l">متاح دائماً</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="feat-sec">
+  <div class="container">
+    <div class="sec-hd">
+      <span class="sec-eyebrow">كل ما تحتاجه</span><div class="gold-bar"></div>
+      <h2 class="t-section c-navy">المنظومة القانونية الذكية</h2>
+      <p class="sec-sub">أدوات متكاملة تجمع الذكاء الاصطناعي مع المحتوى القانوني العربي العميق</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feature-card">
+        <div class="fc-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path stroke="#59BEE7" stroke-width="1.8" stroke-linecap="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle fill="#FFC838" cx="9" cy="10" r="1.4"/><circle fill="#FFC838" cx="12" cy="10" r="1.4"/><circle fill="#FFC838" cx="15" cy="10" r="1.4"/></svg></div>
+        <div class="fc-title">مساعد البحث</div>
+        <div class="fc-desc">ابحث في القوانين والأحكام بالعربية والإنجليزية واحصل على إجابات مع استشهادات دقيقة من المصادر الرسمية</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path stroke="#59BEE7" stroke-width="1.8" stroke-linecap="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="#59BEE7" stroke-width="1.8" stroke-linecap="round" points="14 2 14 8 20 8"/><path fill="#FFC838" d="M8 13h8v1.5H8z"/><path fill="#FFC838" d="M8 16h5v1.5H8z"/></svg></div>
+        <div class="fc-title">مساعد العقود</div>
+        <div class="fc-desc">حلّل العقود، استخرج المخاطر، حدد البنود المفقودة، وصِغ ردوداً احترافية بالعربية والإنجليزية</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path stroke="#59BEE7" stroke-width="1.8" stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/><rect fill="#FFC838" x="15" y="4" width="6" height="4" rx="1"/><rect fill="#FFC838" x="15" y="10" width="6" height="4" rx="1"/></svg></div>
+        <div class="fc-title">مساعد التقاضي</div>
+        <div class="fc-desc">دعم بحثي وتحليلي شامل للنزاعات القضائية — سوابق، حجج قانونية، وتحليل نقاط القوة والضعف</div>
+      </div>
+      <div class="feature-card excl">
+        <div class="fc-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path stroke="#FFC838" stroke-width="1.8" stroke-linecap="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path fill="#FFC838" fill-opacity=".4" d="M12 19s6-3 6-7.5V6.5L12 4.2 6 6.5V11.5c0 4.5 6 7.5 6 7.5z"/></svg></div>
+        <div class="fc-title">فحص شرعي</div>
+        <div class="fc-desc">تحليل مدى توافق العقود مع أحكام الشريعة الإسلامية وفق المذاهب الأربعة — حنفي، مالكي، شافعي، حنبلي</div>
+        <div class="fc-badge">حصري عربي</div>
+      </div>
+      <div class="feature-card excl">
+        <div class="fc-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect stroke="#FFC838" stroke-width="1.8" x="2" y="3" width="20" height="14" rx="2"/><path fill="#FFC838" fill-opacity=".4" d="M6 7h12v2H6z"/><path fill="#FFC838" d="M6 11h8v1.5H6z"/><line stroke="#FFC838" stroke-width="1.8" x1="8" y1="21" x2="16" y2="21"/></svg></div>
+        <div class="fc-title">التمويل الإسلامي</div>
+        <div class="fc-desc">تحليل عقود المرابحة والإجارة والصكوك وفق معايير هيئة المحاسبة والمراجعة للمؤسسات المالية الإسلامية</div>
+        <div class="fc-badge">حصري عربي</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle stroke="#59BEE7" stroke-width="1.8" cx="11" cy="11" r="8"/><line stroke="#59BEE7" stroke-width="1.8" stroke-linecap="round" x1="21" y1="21" x2="16.65" y2="16.65"/><path fill="#FFC838" d="M8 9.5h6v1.5H8z"/><path fill="#FFC838" d="M8 12h4v1.5H8z"/></svg></div>
+        <div class="fc-title">الروابط المرجعية</div>
+        <div class="fc-desc">اكتشف العلاقات بين القوانين والأحكام والمواد القانونية عبر جميع الاختصاصات القضائية العربية</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how-sec" id="how">
+  <div class="container">
+    <div class="sec-hd">
+      <span class="sec-eyebrow">كيف يعمل</span><div class="gold-bar"></div>
+      <h2 class="t-section c-navy">ثلاث خطوات للحصول على إجابتك</h2>
+    </div>
+    <div class="how-grid">
+      <div class="how-step"><div class="how-num">١</div><div class="how-title">ارفع المستند أو اكتب سؤالك</div><div class="how-desc">ارفع عقداً أو وثيقة قانونية بصيغة PDF أو Word، أو اكتب سؤالك القانوني مباشرةً بالعربية أو الإنجليزية</div></div>
+      <div class="how-step"><div class="how-num">٢</div><div class="how-title">ميزان يبحث ويحلل</div><div class="how-desc">يبحث ميزان في قاعدة بياناته القانونية الضخمة — أكثر من ٩٠ ألف تشريع و٤ ملايين حكم قضائي — ويحلل المستند بدقة</div></div>
+      <div class="how-step"><div class="how-num">٣</div><div class="how-title">إجابة موثّقة مع استشهادات</div><div class="how-desc">تحصل على إجابة قانونية احترافية مع استشهادات دقيقة بأرقام المواد والجريدة الرسمية والسوابق القضائية</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="test-sec">
+  <div class="container">
+    <div class="sec-hd">
+      <span class="sec-eyebrow">آراء المحترفين</span><div class="gold-bar"></div>
+      <h2 class="t-section c-navy">يثق به المحامون والمؤسسات</h2>
+    </div>
+    <div class="test-grid">
+      <div class="test-card"><div class="test-stars"><span class="test-star">★</span><span class="test-star">★</span><span class="test-star">★</span><span class="test-star">★</span><span class="test-star">★</span></div><div class="test-quote">"ميزان غيّر طريقة عملي تماماً. ما كنت أحتاج إليه ساعتين من البحث القانوني أحصل عليه الآن في دقائق، مع استشهادات دقيقة من الجريدة الرسمية."</div><div class="test-author"><div><div class="test-name">المحامي خالد العمري</div><div class="test-role">مكتب العمري للمحاماة · عمّان</div></div><div class="test-av">خع</div></div></div>
+      <div class="test-card"><div class="test-stars"><span class="test-star">★</span><span class="test-star">★</span><span class="test-star">★</span><span class="test-star">★</span><span class="test-star">★</span></div><div class="test-quote">"أداة الفحص الشرعي استثنائية. أول منصة ذكاء اصطناعي تفهم الفرق بين المذاهب وتستشهد بالمصادر الفقهية بشكل صحيح."</div><div class="test-author"><div><div class="test-name">د. فاطمة الخليل</div><div class="test-role">مستشار قانوني · بنك الإمارات الإسلامي</div></div><div class="test-av">فخ</div></div></div>
+      <div class="test-card"><div class="test-stars"><span class="test-star">★</span><span class="test-star">★</span><span class="test-star">★</span><span class="test-star">★</span><span class="test-star">★</span></div><div class="test-quote">"وفّرنا أكثر من ٦٠٪ من وقت مراجعة العقود في الشهر الأول. الذكاء الاصطناعي يفهم السياق القانوني الأردني بدقة مذهلة."</div><div class="test-author"><div><div class="test-name">المستشار رامي النصر</div><div class="test-role">المدير القانوني · مجموعة الزيتونة</div></div><div class="test-av">رن</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="trust-strip">
+  <div class="container">
+    <div class="gold-bar"></div>
+    <h2 class="t-section c-white">تحظى بثقة القانونيين والمؤسسات الرائدة</h2>
+    <div class="trust-logos">
+      <span class="trust-logo">Arab Bank</span><span class="trust-logo">الجمارك الأردنية</span><span class="trust-logo">البنك المركزي</span><span class="trust-logo">وزارة العدل</span><span class="trust-logo">الديوان الملكي</span>
+    </div>
+  </div>
+</section>
+
+<section class="cta-sec">
+  <div class="container">
+    <h2 class="cta-title">جاهز للبدء؟</h2>
+    <p class="cta-sub">انضم إلى آلاف المحامين العرب الذين يثقون بميزان</p>
+    <div class="cta-btns">
+      <a class="btn btn-primary btn-lg" href="app.html">ابدأ مجاناً — لا تحتاج بطاقة ائتمانية</a>
+      <a class="btn btn-outline btn-lg" href="pricing.html">عرض الأسعار</a>
+    </div>
+    <p class="cta-note">الخطة المجانية تشمل ٥ وثائق و١٠ استفسارات شهرياً</p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="foot-brand-logo"><div class="foot-brand-disc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><span class="foot-brand-name">ميزان</span></div>
+        <p class="foot-brand-desc">منصة الذكاء الاصطناعي القانوني المتخصصة للمحترفين في العالم العربي</p>
+        <div style="display:flex;gap:10px;flex-direction:row-reverse;flex-wrap:wrap">
+          <a href="about.html" style="font-size:12px;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-xs);padding:4px 12px">بيانات المستخدم محمية</a>
+          <a href="about.html" style="font-size:12px;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-xs);padding:4px 12px">لا تدريب على بياناتك</a>
+        </div>
+      </div>
+      <div><div class="foot-head">المنصة</div><div class="foot-links"><a class="foot-link" href="app.html">المساعد القانوني</a><a class="foot-link" href="app.html#research">البحث القانوني</a><a class="foot-link" href="app.html#sharia">الفحص الشرعي</a><a class="foot-link" href="app.html">خزنة المستندات</a><a class="foot-link" href="pricing.html">الأسعار</a></div></div>
+      <div><div class="foot-head">الدول</div><div class="foot-links"><span class="foot-link">🇯🇴 الأردن</span><span class="foot-link">🇦🇪 الإمارات</span><span class="foot-link">🇸🇦 المملكة العربية السعودية</span><span class="foot-link">🇶🇦 قطر</span><span class="foot-link">+ ٥ دول أخرى</span></div></div>
+      <div><div class="foot-head">تواصل معنا</div><div class="foot-links"><a class="foot-link" href="mailto:hello@meezan.ai" style="direction:ltr;display:block">hello@meezan.ai</a><span class="foot-link" style="direction:ltr;display:block">+962 79 000 1234</span><span class="foot-link">عمّان، الأردن</span><a class="foot-link" href="about.html">عن ميزان</a></div></div>
+    </div>
+    <div class="foot-bar">
+      <div class="foot-copy">© 2026 Meezan AI · CyberLaw Ltd · Registered in Jordan</div>
+      <div class="foot-legal"><a href="#">سياسة الخصوصية</a><a href="#">شروط الاستخدام</a></div>
+    </div>
+  </div>
+</footer>
+<script src="js/meezan.js"></script>
+</body>
+</html>

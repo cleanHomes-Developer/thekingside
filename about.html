@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>عن ميزان · الأمان والثقة · Meezan Legal AI</title>
+<meta name="description" content="ميزان — مهمتنا ورؤيتنا وضماناتنا. بياناتك لا تُستخدم للتدريب. لا إعلانات. خصوصية تامة.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/meezan.css">
+<style>
+/* ── PAGE-SPECIFIC ── */
+.mission-sec{padding:100px 0;background:var(--white)}
+.mission-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.mission-text h2{font-size:42px;font-weight:800;color:var(--navy);line-height:1.2;margin-bottom:24px}
+.mission-text p{font-size:17px;color:var(--text-body);line-height:1.85;margin-bottom:18px}
+.mission-visual{background:var(--grad-card);border-radius:var(--r-xl);padding:48px 40px;display:flex;flex-direction:column;gap:24px}
+.mv-stat{border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:20px}
+.mv-stat:last-child{border-bottom:none;padding-bottom:0}
+.mv-n{font-size:48px;font-weight:800;color:var(--gold);line-height:1;margin-bottom:4px}
+.mv-l{font-size:15px;color:rgba(255,255,255,.65)}
+/* North star */
+.northstar-sec{padding:80px 0;background:var(--navy-dark);text-align:center;position:relative;overflow:hidden}
+.northstar-sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(89,189,230,.08) 0%,transparent 60%)}
+.ns-quote{font-size:28px;font-weight:700;color:white;max-width:780px;margin:30px auto;line-height:1.5;position:relative}
+.ns-quote span{color:var(--gold)}
+.ns-source{font-size:14px;color:rgba(255,255,255,.4);margin-top:16px;position:relative}
+/* Trust pillars */
+.trust-sec{padding:100px 0;background:var(--gray-1)}
+.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:64px}
+.trust-card{background:var(--white);border-radius:var(--r-xl);padding:40px 32px;border:1.5px solid var(--gray-3);transition:all .3s}
+.trust-card:hover{box-shadow:var(--sh-card);border-color:transparent;transform:translateY(-4px)}
+.trust-icon{width:64px;height:64px;border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+.trust-icon.green{background:rgba(30,158,107,.1);border:1.5px solid rgba(30,158,107,.2)}
+.trust-icon.green svg{color:var(--green)}
+.trust-icon.navy{background:rgba(6,68,114,.08);border:1.5px solid rgba(6,68,114,.15)}
+.trust-icon.navy svg{color:var(--navy)}
+.trust-icon.gold{background:rgba(245,181,68,.1);border:1.5px solid rgba(245,181,68,.25)}
+.trust-icon.gold svg{color:var(--gold)}
+.trust-title{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:12px}
+.trust-desc{font-size:15px;color:var(--text-body);line-height:1.8}
+/* Data residency */
+.data-sec{padding:100px 0;background:var(--white)}
+.data-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.data-table{width:100%;border-collapse:collapse;border-radius:var(--r-lg);overflow:hidden;border:1.5px solid var(--gray-3)}
+.data-table th{background:var(--navy);color:white;padding:14px 20px;font-size:14px;font-weight:600;text-align:right}
+.data-table th:not(:first-child){text-align:center}
+.data-table td{padding:14px 20px;font-size:14px;color:var(--text-body);border-top:1px solid var(--gray-2);vertical-align:middle}
+.data-table td:not(:first-child){text-align:center}
+.data-table tr:hover td{background:var(--gray-1)}
+.dt-yes{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(30,158,107,.12)}
+.dt-yes svg{color:var(--green)}
+.dt-soon{font-size:11px;color:var(--cyan-vivid);font-weight:600}
+.guarantee-list{display:flex;flex-direction:column;gap:20px}
+.guarantee-item{display:flex;align-items:flex-start;gap:16px;flex-direction:row-reverse}
+.g-icon{width:44px;height:44px;border-radius:var(--r-md);background:rgba(30,158,107,.1);border:1.5px solid rgba(30,158,107,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.g-icon svg{color:var(--green)}
+.g-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.g-desc{font-size:14px;color:var(--text-body);line-height:1.7}
+/* Pledge */
+.pledge-sec{padding:80px 0;background:var(--navy-dark);position:relative;overflow:hidden}
+.pledge-sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(89,189,230,.08) 0%,transparent 60%)}
+.pledge-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative}
+.pledge-badge{width:120px;height:120px;border-radius:50%;background:rgba(245,181,68,.12);border:2px solid rgba(245,181,68,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:28px}
+.pledge-badge svg{color:var(--gold);margin-bottom:6px}
+.pledge-badge span{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px;text-align:center;line-height:1.3}
+.pledge-text h2{font-size:38px;font-weight:800;color:white;margin-bottom:20px;line-height:1.2}
+.pledge-text p{font-size:16px;color:rgba(255,255,255,.7);line-height:1.85;margin-bottom:16px}
+.pledge-points{display:flex;flex-direction:column;gap:14px;margin-top:24px}
+.pp{display:flex;align-items:center;gap:12px;font-size:15px;color:rgba(255,255,255,.8);flex-direction:row-reverse}
+.pp-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.pledge-visual{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.pv-box{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-xl);padding:28px 32px;width:100%;text-align:center}
+.pv-icon{font-size:36px;margin-bottom:12px}
+.pv-title{font-size:16px;font-weight:700;color:white;margin-bottom:6px}
+.pv-sub{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6}
+/* Tech stack */
+.tech-sec{padding:100px 0;background:var(--gray-1)}
+.tech-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:60px}
+.tech-card{background:var(--white);border-radius:var(--r-lg);padding:28px 24px;text-align:center;border:1.5px solid var(--gray-3);transition:all .25s}
+.tech-card:hover{border-color:var(--cyan);box-shadow:var(--sh-soft)}
+.tech-logo{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:8px;letter-spacing:-.5px}
+.tech-role{font-size:12px;color:var(--gray-4);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px}
+.tech-desc{font-size:13px;color:var(--text-body);line-height:1.6}
+/* Contact */
+.contact-sec{padding:100px 0;background:var(--white)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.contact-info h2{font-size:38px;font-weight:800;color:var(--navy);margin-bottom:20px}
+.contact-info p{font-size:16px;color:var(--text-body);line-height:1.8;margin-bottom:28px}
+.contact-item{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-direction:row-reverse}
+.ci-icon{width:44px;height:44px;border-radius:var(--r-md);background:var(--gray-1);border:1.5px solid var(--gray-3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ci-icon svg{color:var(--navy)}
+.ci-label{font-size:12px;color:var(--gray-4);font-weight:600;text-transform:uppercase;letter-spacing:.8px}
+.ci-val{font-size:15px;color:var(--navy);font-weight:600}
+.contact-form{background:var(--gray-1);border-radius:var(--r-xl);padding:40px;border:1.5px solid var(--gray-3)}
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:14px;font-weight:600;color:var(--navy);margin-bottom:8px}
+.form-input,.form-select,.form-textarea{width:100%;padding:12px 16px;border-radius:var(--r-sm);border:1.5px solid var(--gray-3);font-family:var(--f);font-size:15px;color:var(--navy);background:var(--white);transition:border-color .2s;outline:none;direction:rtl}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--cyan)}
+.form-textarea{resize:vertical;min-height:120px}
+.form-select{appearance:none;cursor:pointer}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+/* Responsive */
+@media(max-width:900px){
+  .mission-grid,.data-grid,.pledge-inner,.contact-grid{grid-template-columns:1fr;gap:40px}
+  .trust-grid{grid-template-columns:1fr 1fr}
+  .tech-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .trust-grid,.tech-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="site-header dark" id="site-hdr">
+  <div class="container">
+    <nav class="nav-wrap">
+      <a class="nav-logo" href="index.html">
+        <div class="logo-disc"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div class="logo-txt"><div class="logo-ar">ميزان</div><div class="logo-en">Meezan Legal AI</div></div>
+      </a>
+      <div class="nav-links">
+        <a class="nav-lnk" href="index.html">الرئيسية</a>
+        <a class="nav-lnk" href="app.html">المساعد</a>
+        <a class="nav-lnk" href="app.html#research">البحث القانوني</a>
+        <a class="nav-lnk" href="app.html#sharia">الفحص الشرعي</a>
+        <a class="nav-lnk" href="pricing.html">الأسعار</a>
+        <a class="nav-lnk on" href="about.html">عن ميزان</a>
+      </div>
+      <div class="nav-ctas">
+        <a class="nav-login" href="app.html">تسجيل الدخول</a>
+        <a class="btn btn-primary btn-sm" href="app.html">ابدأ مجاناً</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="hero-eyebrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> الأمان · الثقة · الشفافية</div>
+    <h1 class="ph-title">نبني مستقبل<br><span style="color:var(--gold)">العدالة الرقمية العربية</span></h1>
+    <p class="ph-sub">ميزان ليس مجرد أداة — هو التزام بأن يكون كل محامٍ عربي مسلحاً بأفضل التقنيات القانونية في العالم</p>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section class="mission-sec">
+  <div class="container">
+    <div class="mission-grid">
+      <div class="mission-text">
+        <span class="sec-eyebrow">مهمتنا</span>
+        <div class="gold-bar" style="margin-inline:0"></div>
+        <h2>تمكين المحامي العربي من الوصول إلى العدالة بكفاءة غير مسبوقة</h2>
+        <p>نؤمن بأن كل محامٍ عربي — سواء كان في مكتب صغير في عمّان أو مؤسسة مالية كبرى في دبي — يستحق الوصول إلى أدوات ذكاء اصطناعي قانوني متطورة تفهم سياقه القانوني والثقافي.</p>
+        <p>ميزان هو أول منصة ذكاء اصطناعي قانوني مبنية من الأساس للمنظومة القانونية العربية — بمحتوى قانوني أصيل، وفهم للمذاهب الفقهية، وتغطية لـ٢٢ دولة عربية.</p>
+        <a class="btn btn-outline-navy btn-lg" href="app.html" style="margin-top:16px">جرّب ميزان مجاناً</a>
+      </div>
+      <div class="mission-visual">
+        <div class="mv-stat"><div class="mv-n">٢٠٢٤</div><div class="mv-l">سنة التأسيس في عمّان، الأردن</div></div>
+        <div class="mv-stat"><div class="mv-n">٢٢</div><div class="mv-l">دولة عربية مغطاة</div></div>
+        <div class="mv-stat"><div class="mv-n">٩٠ألف+</div><div class="mv-l">تشريع وقانون في قاعدة البيانات</div></div>
+        <div class="mv-stat"><div class="mv-n">٤م+</div><div class="mv-l">حكم قضائي قابل للبحث</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NORTH STAR -->
+<section class="northstar-sec">
+  <div class="container">
+    <span class="sec-eyebrow" style="color:var(--cyan)">رؤيتنا</span>
+    <div class="ns-quote">"العدالة لا تُقاس بعدد المحامين، بل بمدى <span>وصول كل إنسان</span> إلى حقه القانوني"</div>
+    <div class="ns-source">— مبدأ ميزان التأسيسي</div>
+  </div>
+</section>
+
+<!-- TRUST PILLARS -->
+<section class="trust-sec">
+  <div class="container">
+    <div class="sec-hd">
+      <span class="sec-eyebrow">ركائز الثقة</span><div class="gold-bar"></div>
+      <h2 class="t-section c-navy">ثقتك هي أساس عملنا</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="trust-icon green"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+        <div class="trust-title">لا تدريب على بياناتك</div>
+        <div class="trust-desc">بياناتك ووثائقك لا تُستخدم أبداً لتدريب نماذج الذكاء الاصطناعي. ما ترفعه يبقى ملكاً لك وحدك، ويُحذف فور انتهاء الجلسة إن اخترت ذلك.</div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon navy"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div class="trust-title">تشفير من الطرف إلى الطرف</div>
+        <div class="trust-desc">جميع البيانات مشفرة بمعيار AES-256 أثناء النقل والتخزين. نستخدم بنية تحتية سحابية معتمدة بـISO 27001 وSOC 2 Type II.</div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon gold"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="trust-title">شفافية كاملة في الاستشهادات</div>
+        <div class="trust-desc">كل إجابة تأتي مع استشهادات قابلة للتحقق — أرقام المواد، الجريدة الرسمية، أرقام الأحكام. لا ادعاءات بلا مصادر.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATA RESIDENCY -->
+<section class="data-sec">
+  <div class="container">
+    <div class="sec-hd" style="margin-bottom:60px">
+      <span class="sec-eyebrow">إقامة البيانات</span><div class="gold-bar"></div>
+      <h2 class="t-section c-navy">بياناتك تبقى في منطقتك</h2>
+    </div>
+    <div class="data-grid">
+      <div>
+        <table class="data-table">
+          <thead><tr><th>المنطقة</th><th>الخادم</th><th>متاح الآن</th></tr></thead>
+          <tbody>
+            <tr><td>الأردن والمشرق</td><td>Frankfurt / Bahrain</td><td><div class="dt-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div></td></tr>
+            <tr><td>الخليج العربي</td><td>Bahrain / UAE</td><td><div class="dt-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div></td></tr>
+            <tr><td>شمال أفريقيا</td><td>Frankfurt</td><td><div class="dt-yes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div></td></tr>
+            <tr><td>السعودية (محلي)</td><td>Riyadh DC</td><td><span class="dt-soon">قريباً</span></td></tr>
+            <tr><td>الإمارات (محلي)</td><td>Abu Dhabi DC</td><td><span class="dt-soon">قريباً</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="guarantee-list">
+        <div class="guarantee-item"><div class="g-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div><div class="g-title">لا مشاركة مع أطراف ثالثة</div><div class="g-desc">بياناتك لا تُشارك مع أي طرف ثالث لأي غرض، بما في ذلك الإعلانات أو التحليلات الخارجية.</div></div></div>
+        <div class="guarantee-item"><div class="g-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div><div class="g-title">حق الحذف الكامل</div><div class="g-desc">يمكنك حذف حسابك وجميع بياناتك في أي وقت. نضمن الحذف الكامل خلال ٧٢ ساعة.</div></div></div>
+        <div class="guarantee-item"><div class="g-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="g-title">امتثال GDPR وأنظمة البيانات العربية</div><div class="g-desc">نلتزم بالتشريعات الأوروبية لحماية البيانات وأنظمة حماية البيانات في الأردن والإمارات والسعودية.</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ZERO TRAINING PLEDGE -->
+<section class="pledge-sec">
+  <div class="container">
+    <div class="pledge-inner">
+      <div class="pledge-text">
+        <div class="pledge-badge"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><span>ZERO TRAINING PLEDGE</span></div>
+        <h2>تعهّد عدم التدريب على بياناتك</h2>
+        <p>نحن نتعهد رسمياً بأن بياناتك ووثائقك واستفساراتك لن تُستخدم أبداً لتدريب أو تحسين أي نموذج ذكاء اصطناعي — سواء نماذجنا أو نماذج أطراف ثالثة.</p>
+        <div class="pledge-points">
+          <div class="pp"><div class="pp-dot"></div><span>لا تدريب على وثائقك القانونية</span></div>
+          <div class="pp"><div class="pp-dot"></div><span>لا تدريب على استفساراتك ومحادثاتك</span></div>
+          <div class="pp"><div class="pp-dot"></div><span>لا مشاركة مع مزودي الذكاء الاصطناعي لأغراض التدريب</span></div>
+          <div class="pp"><div class="pp-dot"></div><span>تدقيق خارجي سنوي للتحقق من الالتزام</span></div>
+        </div>
+      </div>
+      <div class="pledge-visual">
+        <div class="pv-box"><div class="pv-icon">🔒</div><div class="pv-title">بياناتك مشفرة</div><div class="pv-sub">AES-256 في النقل والتخزين</div></div>
+        <div class="pv-box"><div class="pv-icon">🚫</div><div class="pv-title">لا تدريب</div><div class="pv-sub">بياناتك لا تُلمس لأغراض التدريب</div></div>
+        <div class="pv-box"><div class="pv-icon">✅</div><div class="pv-title">تدقيق مستقل</div><div class="pv-sub">تقارير سنوية من جهات خارجية معتمدة</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section class="tech-sec">
+  <div class="container">
+    <div class="sec-hd">
+      <span class="sec-eyebrow">التقنية</span><div class="gold-bar"></div>
+      <h2 class="t-section c-navy">مبني على أفضل التقنيات</h2>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-card"><div class="tech-logo">Claude 3.5</div><div class="tech-role">نموذج اللغة</div><div class="tech-desc">نموذج Anthropic المتقدم مع تحسينات خاصة للمحتوى القانوني العربي</div></div>
+      <div class="tech-card"><div class="tech-logo">pgvector</div><div class="tech-role">البحث الدلالي</div><div class="tech-desc">بحث دلالي متقدم في ملايين الوثائق القانونية بدقة عالية</div></div>
+      <div class="tech-card"><div class="tech-logo">Next.js 15</div><div class="tech-role">الواجهة الأمامية</div><div class="tech-desc">تطبيق ويب سريع ومتجاوب مع دعم كامل للغة العربية وRTL</div></div>
+      <div class="tech-card"><div class="tech-logo">Supabase</div><div class="tech-role">قاعدة البيانات</div><div class="tech-desc">قاعدة بيانات PostgreSQL مع تشفير كامل وامتثال SOC 2</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-sec" id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <span class="sec-eyebrow">تواصل معنا</span>
+        <div class="gold-bar" style="margin-inline:0"></div>
+        <h2>نسعد بسماعك</h2>
+        <p>سواء كنت تبحث عن خطة Enterprise أو لديك سؤال تقني أو تريد التعاون معنا، فريقنا مستعد للمساعدة.</p>
+        <div class="contact-item"><div class="ci-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="ci-label">البريد الإلكتروني</div><div class="ci-val" style="direction:ltr">hello@meezan.ai</div></div></div>
+        <div class="contact-item"><div class="ci-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.76h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div><div class="ci-label">الهاتف</div><div class="ci-val" style="direction:ltr">+962 79 000 1234</div></div></div>
+        <div class="contact-item"><div class="ci-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="ci-label">العنوان</div><div class="ci-val">عمّان، الأردن · المملكة الأردنية الهاشمية</div></div></div>
+      </div>
+      <div class="contact-form">
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">الاسم الكامل</label><input class="form-input" type="text" placeholder="محمد العبدالله"></div>
+          <div class="form-group"><label class="form-label">البريد الإلكتروني</label><input class="form-input" type="email" placeholder="name@firm.com" style="direction:ltr"></div>
+        </div>
+        <div class="form-group"><label class="form-label">الشركة / المكتب</label><input class="form-input" type="text" placeholder="مكتب العبدالله للمحاماة"></div>
+        <div class="form-group">
+          <label class="form-label">موضوع الرسالة</label>
+          <select class="form-select">
+            <option>استفسار عن خطة Enterprise</option>
+            <option>دعم تقني</option>
+            <option>شراكة أو تكامل</option>
+            <option>تغطية دولة جديدة</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">رسالتك</label><textarea class="form-textarea" placeholder="اكتب رسالتك هنا..."></textarea></div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="this.textContent='✓ تم الإرسال';this.style.background='var(--green)'">إرسال الرسالة</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="foot-brand-logo"><div class="foot-brand-disc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><span class="foot-brand-name">ميزان</span></div>
+        <p class="foot-brand-desc">منصة الذكاء الاصطناعي القانوني المتخصصة للمحترفين في العالم العربي</p>
+      </div>
+      <div><div class="foot-head">المنصة</div><div class="foot-links"><a class="foot-link" href="app.html">المساعد القانوني</a><a class="foot-link" href="app.html#research">البحث القانوني</a><a class="foot-link" href="app.html#sharia">الفحص الشرعي</a><a class="foot-link" href="pricing.html">الأسعار</a></div></div>
+      <div><div class="foot-head">الشركة</div><div class="foot-links"><a class="foot-link" href="about.html">عن ميزان</a><a class="foot-link" href="about.html#contact">تواصل معنا</a><a class="foot-link" href="#">المدونة</a></div></div>
+      <div><div class="foot-head">تواصل معنا</div><div class="foot-links"><a class="foot-link" href="mailto:hello@meezan.ai" style="direction:ltr;display:block">hello@meezan.ai</a><span class="foot-link" style="direction:ltr;display:block">+962 79 000 1234</span></div></div>
+    </div>
+    <div class="foot-bar">
+      <div class="foot-copy">© 2026 Meezan AI · CyberLaw Ltd · Registered in Jordan</div>
+      <div class="foot-legal"><a href="#">سياسة الخصوصية</a><a href="#">شروط الاستخدام</a></div>
+    </div>
+  </div>
+</footer>
+<script src="js/meezan.js"></script>
+</body>
+</html>
