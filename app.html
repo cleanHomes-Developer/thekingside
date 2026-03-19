@@ -685,7 +685,7 @@ input,textarea,select{font-family:inherit}
 <div class="sec-row">
 <div class="sec-title">خزنة المستندات</div>
 <div style="display:flex;gap:8px">
-<button class="btn btn-ghost btn-sm">فلترة</button>
+<button class="btn btn-ghost btn-sm" onclick="cycleVaultFilter(this)">فلترة</button>
 <button class="btn btn-primary btn-sm" onclick="showPanel('vault-upload')">
 <svg fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="14"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
             رفع مستند
@@ -736,7 +736,7 @@ input,textarea,select{font-family:inherit}
 <span style="font-size:14px;font-weight:700;color:var(--navy);flex:1">عقد إيجار تجاري — شركة الفجر</span>
 <button class="btn btn-ghost btn-sm" onclick="showPanel('risk')">تقييم المخاطر</button>
 <button class="btn btn-ghost btn-sm" onclick="showPanel('qa')">اسأل عنه</button>
-<button class="btn btn-primary btn-sm">تحميل</button>
+<button class="btn btn-primary btn-sm" onclick="showToast('جارٍ تحميل المستند...', 'blue')">تحميل</button>
 </div>
 <div class="vp-body">
 <div class="doc-page">
@@ -769,7 +769,7 @@ input,textarea,select{font-family:inherit}
 <select class="form-select" style="width:auto;padding:7px 12px;font-size:13px">
 <option>الأردن</option><option>الإمارات</option><option>السعودية</option><option>مصر</option><option>الكويت</option>
 </select>
-<button class="btn btn-ghost btn-sm">محادثة جديدة</button>
+<button class="btn btn-ghost btn-sm" onclick="newChat()">محادثة جديدة</button>
 </div>
 </div>
 <div class="chat-wrap">
@@ -851,8 +851,8 @@ input,textarea,select{font-family:inherit}
 <div class="ri-title">⚠ إنهاء العقد دون إشعار — المادة الرابعة</div>
 <div class="ri-desc">يمنح العقد المؤجر حق الإنهاء الفوري دون إشعار مسبق عند تأخر ٧ أيام فقط. هذا مخالف للمادة (٥٦٢) من القانون المدني الأردني التي تشترط إشعاراً لا يقل عن ٣٠ يوماً.</div>
 <div style="margin-top:8px;display:flex;gap:8px;flex-direction:row-reverse">
-<button class="btn btn-ghost btn-sm">اقتراح تعديل</button>
-<button class="btn btn-ghost btn-sm">عرض القانون</button>
+<button class="btn btn-ghost btn-sm" onclick="suggestEdit()">اقتراح تعديل</button>
+<button class="btn btn-ghost btn-sm" onclick="showToast('فتح نص القانون المرجعي...', 'blue')">عرض القانون</button>
 </div>
 </div>
 </div>
@@ -1047,8 +1047,8 @@ input,textarea,select{font-family:inherit}
 <div class="cc-meta">
 <span class="tag tag-navy" style="font-size:10px">الأردن</span>
 <span class="tag tag-green" style="font-size:10px">✓ محدّث ٢٠٢٥</span>
-<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px">نسخ</button>
-<button class="btn btn-primary btn-sm" style="font-size:11px">إضافة للعقد</button>
+<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px" onclick="showToast('تم نسخ البند ✓', 'green')">نسخ</button>
+<button class="btn btn-primary btn-sm" style="font-size:11px" onclick="showToast('تمت إضافة البند إلى العقد ✓', 'green')">إضافة للعقد</button>
 </div>
 </div>
 <div class="clause-card">
@@ -1057,8 +1057,8 @@ input,textarea,select{font-family:inherit}
 <div class="cc-meta">
 <span class="tag tag-navy" style="font-size:10px">الأردن</span>
 <span class="tag tag-green" style="font-size:10px">✓ محدّث ٢٠٢٤</span>
-<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px">نسخ</button>
-<button class="btn btn-primary btn-sm" style="font-size:11px">إضافة للعقد</button>
+<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px" onclick="showToast('تم نسخ البند ✓', 'green')">نسخ</button>
+<button class="btn btn-primary btn-sm" style="font-size:11px" onclick="showToast('تمت إضافة البند إلى العقد ✓', 'green')">إضافة للعقد</button>
 </div>
 </div>
 <div class="clause-card">
@@ -1067,8 +1067,8 @@ input,textarea,select{font-family:inherit}
 <div class="cc-meta">
 <span class="tag tag-blue" style="font-size:10px">عام</span>
 <span class="tag tag-green" style="font-size:10px">✓ محدّث ٢٠٢٥</span>
-<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px">نسخ</button>
-<button class="btn btn-primary btn-sm" style="font-size:11px">إضافة للعقد</button>
+<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px" onclick="showToast('تم نسخ البند ✓', 'green')">نسخ</button>
+<button class="btn btn-primary btn-sm" style="font-size:11px" onclick="showToast('تمت إضافة البند إلى العقد ✓', 'green')">إضافة للعقد</button>
 </div>
 </div>
 <div class="clause-card">
@@ -1077,8 +1077,8 @@ input,textarea,select{font-family:inherit}
 <div class="cc-meta">
 <span class="tag tag-navy" style="font-size:10px">الأردن</span>
 <span class="tag tag-amber" style="font-size:10px">⚡ راجع قانونياً</span>
-<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px">نسخ</button>
-<button class="btn btn-primary btn-sm" style="font-size:11px">إضافة للعقد</button>
+<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px" onclick="showToast('تم نسخ البند ✓', 'green')">نسخ</button>
+<button class="btn btn-primary btn-sm" style="font-size:11px" onclick="showToast('تمت إضافة البند إلى العقد ✓', 'green')">إضافة للعقد</button>
 </div>
 </div>
 </div>
@@ -1107,7 +1107,7 @@ input,textarea,select{font-family:inherit}
 <div class="panel" id="panel-playbooks">
 <div class="sec-row">
 <div class="sec-title">Playbooks التفاوضية</div>
-<button class="btn btn-primary btn-sm">إنشاء Playbook</button>
+<button class="btn btn-primary btn-sm" onclick="showToast('جارٍ إنشاء Playbook جديد...', 'blue')">إنشاء Playbook</button>
 </div>
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
 <div class="card" onmouseenter="this.style.boxShadow='var(--sh-card)'" onmouseleave="this.style.boxShadow='none'" style="cursor:pointer">
@@ -1236,7 +1236,7 @@ input,textarea,select{font-family:inherit}
 <div style="display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--gray-3);border-radius:var(--r-lg);padding:12px 18px;flex-direction:row-reverse;box-shadow:var(--sh-panel)">
 <svg fill="none" height="18" stroke="var(--gray-4)" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="18"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
 <input placeholder="ابحث في أحكام المحاكم..." style="flex:1;border:none;outline:none;font-size:15px;color:var(--navy);direction:rtl;background:none" type="text"/>
-<button class="btn btn-primary btn-sm">بحث</button>
+<button class="btn btn-primary btn-sm" onclick="searchCourts()">بحث</button>
 </div>
 </div>
 <div style="display:flex;flex-direction:column;gap:12px">
@@ -1249,7 +1249,7 @@ input,textarea,select{font-family:inherit}
 <div class="rc-excerpt">قضت المحكمة برد الطعن وتأييد حكم محكمة الاستئناف القاضي بتقادم المطالبة ببدلات الإيجار المتأخرة لمرور أكثر من خمس سنوات على استحقاقها دون مطالبة قضائية...</div>
 <div class="rc-tags">
 <span class="tag tag-navy">إيجار</span><span class="tag tag-blue">تقادم</span><span class="tag tag-green">نهائي</span>
-<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px">عرض كامل</button>
+<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px" onclick="showToast('جارٍ تحميل نص الحكم الكامل...', 'blue')">عرض كامل</button>
 </div>
 </div>
 <div class="result-card">
@@ -1261,7 +1261,7 @@ input,textarea,select{font-family:inherit}
 <div class="rc-excerpt">قضت المحكمة بأن إنهاء عقد الإيجار دون إشعار مسبق لا يجوز ولو نص عليه العقد، إذ يتعارض ذلك مع النظام العام وأحكام المادة (٥٦٢) من القانون المدني...</div>
 <div class="rc-tags">
 <span class="tag tag-navy">إيجار</span><span class="tag tag-red">إنهاء</span>
-<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px">عرض كامل</button>
+<button class="btn btn-ghost btn-sm" style="margin-inline-start:auto;font-size:11px" onclick="showToast('جارٍ تحميل نص الحكم الكامل...', 'blue')">عرض كامل</button>
 </div>
 </div>
 </div>
@@ -1320,7 +1320,7 @@ input,textarea,select{font-family:inherit}
 <div style="font-size:14px;color:var(--text-body);line-height:1.8;background:rgba(89,189,230,.06);border-radius:var(--r-md);padding:14px;border:1px solid rgba(89,189,230,.15)">
               المادة (٤٦٣) من القانون المدني الأردني: "تتقادم دعاوى المطالبة ببدلات الإيجار بمضي خمس سنوات من تاريخ استحقاق كل بدل."
             </div>
-<button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%">حفظ في المواعيد</button>
+<button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%" onclick="showToast('تم حفظ موعد التقادم في لوحة المواعيد ✓', 'green')">حفظ في المواعيد</button>
 </div>
 </div>
 </div>
@@ -1357,7 +1357,7 @@ input,textarea,select{font-family:inherit}
 <span class="tag tag-gold">حصري عربي</span>
 </div>
 <div style="margin-bottom:20px">
-<div class="drop-zone" onclick="showPanel('sharia-result')" style="padding:28px">
+<div class="drop-zone" id="sharia-check-btn" onclick="runShariaCheck()" style="padding:28px;cursor:pointer">
 <div class="dz-icon"><svg fill="none" height="24" stroke="var(--cyan-vivid)" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg></div>
 <div class="dz-title">ارفع مستنداً للفحص الشرعي</div>
 <div class="dz-sub">أو اختر من الخزنة · PDF, DOCX</div>
@@ -1448,7 +1448,7 @@ input,textarea,select{font-family:inherit}
 <div class="form-group"><label class="form-label">نسبة الربح</label><input class="form-input" placeholder="٦٪ سنوياً" type="text"/></div>
 <div class="form-group"><label class="form-label">مدة التمويل</label><input class="form-input" placeholder="٣ سنوات" type="text"/></div>
 </div>
-<button class="btn btn-primary btn-lg" style="margin-top:8px">توليد العقد الإسلامي</button>
+<button class="btn btn-primary btn-lg" id="islamic-gen-btn" style="margin-top:8px" onclick="generateIslamicContract()">توليد العقد الإسلامي</button>
 </div>
 </div>
 <!-- ═══════════════════════════════════════════════════════
@@ -1457,16 +1457,16 @@ input,textarea,select{font-family:inherit}
 <div class="panel" id="panel-writing">
 <div class="sec-row">
 <div class="sec-title">جودة الكتابة القانونية العربية</div>
-<button class="btn btn-primary btn-sm">تحليل النص</button>
+<button class="btn btn-primary btn-sm" id="analyze-btn" onclick="analyzeWriting()">تحليل النص</button>
 </div>
 <div class="writing-layout">
 <div class="writing-editor">
 <div class="we-toolbar">
-<button class="we-btn">تصحيح إملائي</button>
-<button class="we-btn">تحسين الأسلوب</button>
-<button class="we-btn">توحيد المصطلحات</button>
-<button class="we-btn">فحص النحو</button>
-<button class="we-btn">تبسيط اللغة</button>
+<button class="we-btn" onclick="showToast('جارٍ التصحيح الإملائي...', 'blue')">تصحيح إملائي</button>
+<button class="we-btn" onclick="showToast('جارٍ تحسين الأسلوب...', 'blue')">تحسين الأسلوب</button>
+<button class="we-btn" onclick="showToast('جارٍ توحيد المصطلحات القانونية...', 'blue')">توحيد المصطلحات</button>
+<button class="we-btn" onclick="showToast('جارٍ فحص النحو والصرف...', 'blue')">فحص النحو</button>
+<button class="we-btn" onclick="showToast('جارٍ تبسيط اللغة...', 'blue')">تبسيط اللغة</button>
 </div>
 <div class="we-area" contenteditable="true">
             يُعدّ هذا العقد نافذاً ومُلزِماً للطرفين اعتباراً من تاريخ توقيعه، ويسري على جميع الالتزامات المترتبة عليه وفقاً لأحكام القانون المدني الأردني والتشريعات النافذة ذات الصلة. ويلتزم الطرف الثاني بتنفيذ جميع بنود هذا العقد بحسن نية وأمانة تامة، وعدم الإخلال بأيٍّ من التزاماته الواردة فيه تحت طائلة المسؤولية القانونية الكاملة.
@@ -1475,7 +1475,7 @@ input,textarea,select{font-family:inherit}
 <div class="writing-scores">
 <div class="ws-card">
 <div class="ws-title">الدرجة الإجمالية</div>
-<div class="ws-score"><div class="ws-num" style="color:var(--green)">٨٧</div><div class="ws-label">/ ١٠٠</div></div>
+<div class="ws-score"><div class="ws-num" id="writing-score-num" style="color:var(--green)">٨٧</div><div class="ws-label">/ ١٠٠</div></div>
 <div class="progress-bar"><div class="progress-fill green" style="width:87%"></div></div>
 </div>
 <div class="ws-card">
@@ -1511,7 +1511,7 @@ input,textarea,select{font-family:inherit}
 <div class="sec-title">مراقب الجريدة الرسمية</div>
 <div style="display:flex;gap:8px">
 <select class="form-select" style="width:auto;padding:7px 12px;font-size:13px"><option>الأردن</option><option>الإمارات</option><option>السعودية</option></select>
-<button class="btn btn-primary btn-sm">إعداد تنبيهات</button>
+<button class="btn btn-primary btn-sm" onclick="showToast('تم إعداد تنبيهات الجريدة الرسمية ✓', 'green')">إعداد تنبيهات</button>
 </div>
 </div>
 <div style="background:rgba(89,189,230,.06);border:1px solid rgba(89,189,230,.2);border-radius:var(--r-md);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-direction:row-reverse">
@@ -1551,7 +1551,7 @@ input,textarea,select{font-family:inherit}
 <div class="panel" id="panel-hijri">
 <div class="sec-row">
 <div class="sec-title">التقويم الهجري القانوني</div>
-<button class="btn btn-primary btn-sm">إضافة موعد</button>
+<button class="btn btn-primary btn-sm" onclick="showToast('تمت إضافة الموعد إلى لوحة المواعيد ✓', 'green')">إضافة موعد</button>
 </div>
 <div class="hijri-grid">
 <div class="hijri-cal">
@@ -1604,10 +1604,10 @@ input,textarea,select{font-family:inherit}
 <button class="btn btn-primary btn-sm" id="add-matter-btn">قضية جديدة</button>
 </div>
 <div style="display:flex;gap:10px;margin-bottom:20px;flex-direction:row-reverse;flex-wrap:wrap">
-<button class="btn btn-primary btn-sm">الكل (١٢)</button>
-<button class="btn btn-ghost btn-sm">نشطة (٨)</button>
-<button class="btn btn-ghost btn-sm">معلقة (٣)</button>
-<button class="btn btn-ghost btn-sm">مغلقة (١)</button>
+<button class="btn btn-primary btn-sm" onclick="filterMatters('all',this)">الكل (١٢)</button>
+<button class="btn btn-ghost btn-sm" onclick="filterMatters('active',this)">نشطة (٨)</button>
+<button class="btn btn-ghost btn-sm" onclick="filterMatters('pending',this)">معلقة (٣)</button>
+<button class="btn btn-ghost btn-sm" onclick="filterMatters('closed',this)">مغلقة (١)</button>
 </div>
 <div class="matter-grid" id="matters-grid">
 <div class="matter-card">
@@ -1654,7 +1654,7 @@ input,textarea,select{font-family:inherit}
 <span class="tag tag-red">٤ أيام</span>
 </div>
 <div style="font-size:13px;color:var(--gray-4);margin-bottom:8px">الأحد ٢٣ مارس ٢٠٢٦ · ٩:٠٠ ص · محكمة البداية التجارية</div>
-<div style="display:flex;gap:8px;flex-direction:row-reverse"><button class="btn btn-ghost btn-sm">تذكير</button><button class="btn btn-ghost btn-sm">تفاصيل</button></div>
+<div style="display:flex;gap:8px;flex-direction:row-reverse"><button class="btn btn-ghost btn-sm" onclick="showToast('تم ضبط التذكير ✓', 'green')">تذكير</button><button class="btn btn-ghost btn-sm" onclick="showToast('فتح تفاصيل الموعد...', 'blue')">تفاصيل</button></div>
 </div>
 <div class="card" style="border-inline-start:3px solid var(--amber)">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-direction:row-reverse">
@@ -1662,7 +1662,7 @@ input,textarea,select{font-family:inherit}
 <span class="tag tag-amber">١٣ يوم</span>
 </div>
 <div style="font-size:13px;color:var(--gray-4);margin-bottom:8px">الثلاثاء ١ أبريل ٢٠٢٦ · تقادم ٥ سنوات م.٤٦٣</div>
-<div style="display:flex;gap:8px;flex-direction:row-reverse"><button class="btn btn-ghost btn-sm">تذكير</button><button class="btn btn-primary btn-sm" onclick="showPanel('sol')">حاسبة التقادم</button></div>
+<div style="display:flex;gap:8px;flex-direction:row-reverse"><button class="btn btn-ghost btn-sm" onclick="showToast('تم ضبط التذكير ✓', 'green')">تذكير</button><button class="btn btn-primary btn-sm" onclick="showPanel('sol')">حاسبة التقادم</button></div>
 </div>
 <div class="card" style="border-inline-start:3px solid var(--green)">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-direction:row-reverse">
@@ -1670,7 +1670,7 @@ input,textarea,select{font-family:inherit}
 <span class="tag tag-green">٢٠ يوم</span>
 </div>
 <div style="font-size:13px;color:var(--gray-4);margin-bottom:8px">الأربعاء ٨ أبريل ٢٠٢٦ · ٢:٠٠ م</div>
-<div style="display:flex;gap:8px;flex-direction:row-reverse"><button class="btn btn-ghost btn-sm">تذكير</button><button class="btn btn-ghost btn-sm">تفاصيل</button></div>
+<div style="display:flex;gap:8px;flex-direction:row-reverse"><button class="btn btn-ghost btn-sm" onclick="showToast('تم ضبط التذكير ✓', 'green')">تذكير</button><button class="btn btn-ghost btn-sm" onclick="showToast('فتح تفاصيل الموعد...', 'blue')">تفاصيل</button></div>
 </div>
 <div class="card" style="border-inline-start:3px solid var(--cyan)">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-direction:row-reverse">
@@ -1678,7 +1678,7 @@ input,textarea,select{font-family:inherit}
 <span class="tag tag-blue">٤٥ يوم</span>
 </div>
 <div style="font-size:13px;color:var(--gray-4);margin-bottom:8px">الأحد ٣ مايو ٢٠٢٦ · إشعار ٩٠ يوم مطلوب</div>
-<div style="display:flex;gap:8px;flex-direction:row-reverse"><button class="btn btn-ghost btn-sm">تذكير</button><button class="btn btn-ghost btn-sm">تفاصيل</button></div>
+<div style="display:flex;gap:8px;flex-direction:row-reverse"><button class="btn btn-ghost btn-sm" onclick="showToast('تم ضبط التذكير ✓', 'green')">تذكير</button><button class="btn btn-ghost btn-sm" onclick="showToast('فتح تفاصيل الموعد...', 'blue')">تفاصيل</button></div>
 </div>
 </div>
 </div>
@@ -1804,8 +1804,8 @@ input,textarea,select{font-family:inherit}
 <div class="sec-row">
 <div class="sec-title">غرفة البيانات الآمنة</div>
 <div style="display:flex;gap:8px">
-<button class="btn btn-ghost btn-sm">إدارة الصلاحيات</button>
-<button class="btn btn-primary btn-sm">رفع ملفات</button>
+<button class="btn btn-ghost btn-sm" onclick="showToast('فتح لوحة إدارة الصلاحيات...', 'blue')">إدارة الصلاحيات</button>
+<button class="btn btn-primary btn-sm" onclick="showToast('جارٍ رفع الملفات...', 'blue')">رفع ملفات</button>
 </div>
 </div>
 <div class="dataroom-grid">
@@ -1842,7 +1842,7 @@ input,textarea,select{font-family:inherit}
 <div class="panel" id="panel-portal">
 <div class="sec-row">
 <div class="sec-title">بوابة العملاء</div>
-<button class="btn btn-primary btn-sm">إضافة عميل</button>
+<button class="btn btn-primary btn-sm" onclick="addPortalClient()">إضافة عميل</button>
 </div>
 <div class="portal-grid">
 <div class="portal-client">
@@ -1881,7 +1881,7 @@ input,textarea,select{font-family:inherit}
 <div class="panel" id="panel-api">
 <div class="sec-row">
 <div class="sec-title">API للمطورين</div>
-<button class="btn btn-primary btn-sm">إنشاء مفتاح API</button>
+<button class="btn btn-primary btn-sm" onclick="generateApiKey()">إنشاء مفتاح API</button>
 </div>
 <div class="api-layout">
 
@@ -1938,7 +1938,7 @@ input,textarea,select{font-family:inherit}
 <div class="form-group"><label class="form-label">اسم المنصة</label><input class="form-input" placeholder="اسم مكتبك أو مؤسستك" type="text"/></div>
 <div class="form-group"><label class="form-label">الشعار</label><div class="drop-zone" style="padding:24px"><div class="dz-title" style="font-size:14px">ارفع شعارك</div><div class="dz-sub" style="font-size:12px">PNG, SVG · ٢٠٠×٦٠ px</div></div></div>
 <div class="form-group"><label class="form-label">اللون الرئيسي</label><input class="form-input" style="height:44px;padding:4px" type="color" value="#064472"/></div>
-<button class="btn btn-primary btn-lg" style="width:100%;margin-top:8px">تطبيق التخصيص</button>
+<button class="btn btn-primary btn-lg" style="width:100%;margin-top:8px" onclick="applyWhiteLabel()">تطبيق التخصيص</button>
 </div>
 <div class="card">
 <div class="sec-title">النطاق المخصص</div>
@@ -2000,7 +2000,7 @@ input,textarea,select{font-family:inherit}
 </div>
 <div style="margin-top:8px;padding-top:20px;border-top:1px solid var(--gray-2);display:flex;gap:10px;flex-direction:row-reverse">
 <button class="btn btn-primary btn-lg" id="settings-save-btn">حفظ التغييرات</button>
-<button class="btn btn-ghost btn-lg">إلغاء</button>
+<button class="btn btn-ghost btn-lg" onclick="showToast('تم إلغاء التغييرات', 'amber')">إلغاء</button>
 </div>
 </div><div class="settings-nav">
 <div class="settings-nav-item active"><svg fill="none" height="15" stroke="currentColor" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="15"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>الملف الشخصي</div>
@@ -2538,6 +2538,93 @@ function showHighlightDetail(title) {
   showToast('عرض تفاصيل: ' + title, 'blue');
 }
 
+// ── ADDITIONAL FUNCTIONS FOR WIRED BUTTONS ──
+
+function newChat() {
+  const msgs = document.getElementById('chat-msgs');
+  if (msgs) msgs.innerHTML = '<div class="msg ai"><div class="msg-bubble">مرحباً! أنا مساعدك القانوني الذكي. كيف يمكنني مساعدتك اليوم؟</div></div>';
+  showToast('تم بدء محادثة جديدة', 'blue');
+}
+
+function cycleVaultFilter(btn) {
+  const types = ['فلترة', 'فلترة: عقود', 'فلترة: مراسلات', 'فلترة: تقارير', 'فلترة: صكوك'];
+  const cur = types.indexOf(btn.textContent);
+  btn.textContent = types[(cur + 1) % types.length];
+  showToast(btn.textContent, 'blue');
+}
+
+function suggestEdit() {
+  showToast('جارٍ توليد اقتراح التعديل...', 'blue');
+  setTimeout(() => showToast('تم توليد ٣ اقتراحات تعديل ✓', 'green'), 1400);
+}
+
+function generateIslamicContract() {
+  const btn = document.getElementById('islamic-gen-btn');
+  if (!btn) return;
+  btn.disabled = true; btn.textContent = 'جارٍ التوليد...';
+  setTimeout(() => {
+    btn.disabled = false; btn.textContent = 'توليد العقد الإسلامي';
+    showToast('تم توليد عقد التمويل الإسلامي بنجاح ✓', 'green');
+  }, 1600);
+}
+
+function searchCourts() {
+  const input = document.querySelector('#panel-courts .form-input');
+  const q = input ? input.value.trim() : '';
+  if (!q) { showToast('يرجى إدخال كلمة بحث', 'red'); return; }
+  showToast('جارٍ البحث في أحكام المحاكم...', 'blue');
+  setTimeout(() => showToast('تم العثور على ٥ أحكام مطابقة ✓', 'green'), 1000);
+}
+
+function filterMatters(type, btn) {
+  const labels = { all: 'الكل', active: 'نشطة', pending: 'معلقة', closed: 'مغلقة' };
+  const panel = document.getElementById('panel-matters');
+  if (!panel) return;
+  panel.querySelectorAll('.btn-ghost, .btn-primary').forEach(b => {
+    if (b.textContent.includes('نشطة') || b.textContent.includes('معلقة') || b.textContent.includes('مغلقة') || b.textContent.includes('الكل')) {
+      b.className = 'btn btn-ghost btn-sm';
+    }
+  });
+  if (btn) btn.className = 'btn btn-primary btn-sm';
+  showToast('تصفية: ' + (labels[type] || type), 'blue');
+}
+
+function createInvoice() {
+  showToast('جارٍ إنشاء الفاتورة...', 'blue');
+  setTimeout(() => showToast('تم إنشاء الفاتورة بنجاح ✓', 'green'), 800);
+}
+
+function addPortalClient() {
+  const grid = document.querySelector('.portal-grid');
+  if (!grid) return;
+  const names = ['شركة الأمل للاستثمار', 'مؤسسة الرواد', 'مجموعة الخليج التجارية'];
+  const letters = ['أ', 'ر', 'خ'];
+  const colors = ['rgba(89,189,230,.15)', 'rgba(245,181,68,.15)', 'rgba(220,53,69,.1)'];
+  const textColors = ['var(--cyan-vivid)', 'var(--gold)', 'var(--red)'];
+  const idx = Math.floor(Math.random() * 3);
+  const card = document.createElement('div');
+  card.className = 'portal-client';
+  card.style.cursor = 'pointer';
+  card.innerHTML = `<div class="pc-av" style="background:${colors[idx]};color:${textColors[idx]}">${letters[idx]}</div><div class="pc-name">${names[idx]}</div><div class="pc-type">عميل جديد · نشط</div><div class="pc-stats"><div class="pc-stat"><div class="pc-stat-n">٠</div><div class="pc-stat-l">قضايا</div></div><div class="pc-stat"><div class="pc-stat-n">٠</div><div class="pc-stat-l">وثائق</div></div><div class="pc-stat"><div class="pc-stat-n">٠ د.أ.</div><div class="pc-stat-l">مستحق</div></div></div>`;
+  card.addEventListener('click', () => showToast('فتح ملف: ' + names[idx], 'blue'));
+  grid.appendChild(card);
+  showToast('تم إنشاء بوابة العميل ✓', 'green');
+}
+
+function generateApiKey() {
+  const key = 'mk_live_' + Math.random().toString(36).substr(2, 32);
+  showToast('تم إنشاء مفتاح API: ' + key.substr(0, 20) + '...', 'green');
+}
+
+function applyWhiteLabel() {
+  const btn = document.querySelector('#panel-whitelabel .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'جارٍ التطبيق...'; }
+  setTimeout(() => {
+    if (btn) { btn.disabled = false; btn.textContent = 'تطبيق التخصيص'; }
+    showToast('تم تطبيق تخصيصات العلامة التجارية ✓', 'green');
+  }, 1400);
+}
+
 // ── INIT ALL INTERACTIVE BEHAVIORS ──
 document.addEventListener('DOMContentLoaded', function() {
   initVaultSearch();
@@ -2609,5 +2696,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+<script src="js/interactions.js"></script>
 </body>
 </html>
