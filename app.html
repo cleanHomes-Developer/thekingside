@@ -1014,9 +1014,9 @@ input,textarea,select{font-family:inherit}
           توليد العقد بالذكاء الاصطناعي
         </button>
 </div>
-</div>
 <div id="contract-output" style="display:none;margin-top:20px"></div>
-<!-- ═══════════════════════════════════════════════════════
+</div>
+<!-- ═══════════════════════════════════════════════════════════
          PANEL 7: CLAUSE LIBRARY
     ═══════════════════════════════════════════════════════ -->
 <div class="panel" id="panel-clauses">
@@ -2049,6 +2049,9 @@ function showPanel(id) {
   // Update topbar title
   const titleEl = document.getElementById('topbar-title');
   if (titleEl && PANEL_TITLES[id]) titleEl.textContent = PANEL_TITLES[id];
+  // Reset contract output when navigating away from drafting
+  const contractOutput = document.getElementById('contract-output');
+  if (contractOutput && id !== 'drafting') contractOutput.style.display = 'none';
   // Scroll content to top
   const content = document.querySelector('.content');
   if (content) content.scrollTop = 0;
