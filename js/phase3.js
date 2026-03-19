@@ -230,21 +230,72 @@ function simulateUploadFile(filename) {
       if (pct >= 100) { pct = 100; clearInterval(iv);
         setTimeout(() => {
           if (modal) modal.style.display = 'none';
+          // Clear search box
+          const searchInput = document.getElementById('vault-search');
+          if (searchInput) { searchInput.value = ''; vaultFilter = 'الكل'; }
+          // Reset filter dropdown
+          const filterSel = document.querySelector('#panel-vault select');
+          if (filterSel) filterSel.value = 'الكل';
           // Add new doc to vault
+          const docId = 'doc_new_' + Date.now();
+          const baseName = filename.replace(/\.[^.]+$/, '');
+          const docType = document.getElementById('upload-category')?.value || 'عقود';
           const newDoc = {
-            id: 'doc_new_' + Date.now(),
-            name: filename.replace(/\.[^.]+$/, '') + ' — جديد',
-            type: document.getElementById('upload-category')?.value || 'عقود',
-            icon: filename.endsWith('.pdf') ? 'pdf' : 'doc',
+            id: docId,
+            name: baseName + ' — جديد',
+            type: docType,
+            icon: filename.toLowerCase().endsWith('.pdf') ? 'pdf' : 'doc',
             size: '١.٠ MB', date: 'الآن', risk: null, riskLabel: null, riskClass: null,
-            content: `<h3>${filename}</h3><p>تم رفع المستند بنجاح. جارٍ تحليله بالذكاء الاصطناعي...</p>`
+            content: `<div style="text-align:center;padding:40px 20px">
+              <div style="width:48px;height:48px;border:3px solid var(--cyan);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px"></div>
+              <div style="font-size:15px;font-weight:600;color:var(--navy);margin-bottom:8px">${filename}</div>
+              <div style="font-size:13px;color:var(--gray-4)">جارٍ تحليله بالذكاء الاصطناعي...</div>
+            </div>`
           };
+          // Add spin animation
+          if (!document.getElementById('spin-style')) {
+            const s = document.createElement('style');
+            s.id = 'spin-style';
+            s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+            document.head.appendChild(s);
+          }
           VAULT_DOCS.unshift(newDoc);
+          vaultFilter = 'الكل';
           renderVaultList(VAULT_DOCS);
           // Update count
           const countEl = document.getElementById('vault-count');
           if (countEl) countEl.textContent = `المستندات (${VAULT_DOCS.length})`;
+          // Auto-select the new doc
+          currentVaultDoc = newDoc;
+          const titleEl = document.getElementById('vault-doc-title');
+          const bodyEl = document.getElementById('vault-doc-body');
+          if (titleEl) titleEl.textContent = newDoc.name;
+          if (bodyEl) bodyEl.innerHTML = newDoc.content;
+          renderVaultList(VAULT_DOCS);
           showToast('تم رفع المستند بنجاح ✓', 'green');
+          // After 2.5s simulate AI analysis complete
+          setTimeout(() => {
+            const analysisContent = `<div style="padding:4px 0">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 14px;background:rgba(89,189,230,.08);border-radius:8px;border-inline-start:3px solid var(--cyan)">
+                <span style="font-size:16px">✓</span>
+                <div><div style="font-size:13px;font-weight:700;color:var(--navy)">اكتمل التحليل بالذكاء الاصطناعي</div><div style="font-size:12px;color:var(--gray-4)">تم فحص المستند وتصنيف بنوده</div></div>
+              </div>
+              <h3 style="font-size:15px;margin-bottom:10px">${baseName}</h3>
+              <p>تم رفع المستند وتحليله بنجاح. فيما يلي ملخص أولي:</p>
+              <ul style="padding-right:20px;line-height:2">
+                <li><strong>نوع المستند:</strong> ${docType}</li>
+                <li><strong>عدد الصفحات المقدّر:</strong> ٣–٥ صفحات</li>
+                <li><strong>اللغة:</strong> عربية</li>
+                <li><strong>الحالة:</strong> <span class="tag tag-green">جاهز للمراجعة</span></li>
+              </ul>
+              <p style="margin-top:12px;font-size:13px;color:var(--gray-4)">لتقييم المخاطر أو طرح أسئلة على هذا المستند، استخدم الأزرار أعلاه.</p>
+            </div>`;
+            newDoc.content = analysisContent;
+            if (currentVaultDoc.id === docId) {
+              if (bodyEl) bodyEl.innerHTML = analysisContent;
+            }
+            showToast('اكتمل تحليل الذكاء الاصطناعي ✓', 'green');
+          }, 2500);
         }, 400);
       }
       const bar = document.getElementById('upload-progress');
