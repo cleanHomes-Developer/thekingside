@@ -410,40 +410,61 @@ function sendMessage() {
     document.head.appendChild(s);
   }
 
-  // Simulate AI response after delay
-  setTimeout(() => {
+  // Build conversation history for context
+  if (!window._chatHistory) window._chatHistory = [];
+  window._chatHistory.push({ role: 'user', content: question });
+
+  // Get selected jurisdiction
+  const jurisdictionEl = document.querySelector('#panel-qa .jurisdiction-select, #panel-qa select');
+  const jurisdiction = jurisdictionEl ? jurisdictionEl.value || jurisdictionEl.textContent.trim() : 'الأردن';
+
+  // Call real AI API
+  fetch('http://localhost:5050/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: window._chatHistory.slice(-10), // last 10 messages for context
+      jurisdiction: jurisdiction
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
     const indicator = document.getElementById('typing-indicator');
     if (indicator) indicator.remove();
 
-    // Find best response
-    let response = QA_RESPONSES.default;
-    let sources = [];
-    for (const [key, val] of Object.entries(QA_RESPONSES)) {
-      if (key !== 'default' && question.includes(key)) {
-        response = val;
-        break;
-      }
-    }
+    const answer = data.content || 'عذراً، لم أتمكن من الإجابة. يرجى المحاولة مجدداً.';
 
-    // Generate sources based on question
-    if (question.includes('تقادم') || question.includes('أجور')) {
-      sources = ['قانون العمل م.٣٣', 'الجريدة الرسمية ١٩٩٦', 'تمييز ٢٠٢٢/٤٥٦'];
-    } else if (question.includes('إيجار') || question.includes('إنهاء')) {
-      sources = ['القانون المدني م.٥٦٢', 'قانون المالكين والمستأجرين', 'تمييز ٢٠٢١/٢٣١'];
-    } else if (question.includes('تحكيم')) {
-      sources = ['قانون التحكيم ٢٠٠١', 'مركز التحكيم الأردني', 'اتفاقية نيويورك'];
-    } else if (question.includes('شريعة') || question.includes('مرابحة')) {
-      sources = ['معايير AAOIFI', 'قانون البنوك الإسلامية', 'فتوى هيئة الرقابة الشرعية'];
-    }
+    // Store assistant reply in history
+    window._chatHistory.push({ role: 'assistant', content: answer });
+
+    // Extract [المصدر: ...] citations from the answer text
+    const sourceMatches = [...answer.matchAll(/\[(?:المصدر|المرجع|Source)[:\s]+([^\]]+)\]/g)];
+    const sources = sourceMatches.map(m => m[1].trim());
+    // Remove citation lines from displayed text
+    const cleanAnswer = answer.replace(/\[(?:المصدر|المرجع|Source)[:\s]+[^\]]+\]/g, '').trim();
+    // Convert newlines to <br> and bold **text**
+    const htmlAnswer = cleanAnswer
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
 
     const aiMsg = document.createElement('div');
     aiMsg.className = 'msg ai';
     aiMsg.innerHTML = `
-      <div class="msg-bubble">${response}</div>
+      <div class="msg-bubble">${htmlAnswer}</div>
       ${sources.length ? `<div class="msg-srcs">${sources.map(s => `<span class="msg-src">${s}</span>`).join('')}</div>` : ''}`;
     msgs.appendChild(aiMsg);
     msgs.scrollTop = msgs.scrollHeight;
-  }, 1200 + Math.random() * 800);
+  })
+  .catch(err => {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) indicator.remove();
+    console.error('AI chat error:', err);
+    const aiMsg = document.createElement('div');
+    aiMsg.className = 'msg ai';
+    aiMsg.innerHTML = `<div class="msg-bubble">عذراً، حدث خطأ في الاتصال. يرجى التحقق من الاتصال بالإنترنت والمحاولة مجدداً.</div>`;
+    msgs.appendChild(aiMsg);
+    msgs.scrollTop = msgs.scrollHeight;
+  });
 }
 
 function newChat() {
