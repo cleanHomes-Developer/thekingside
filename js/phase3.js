@@ -125,31 +125,29 @@ function selectVaultDoc(docId) {
   if (!doc) return;
   currentVaultDoc = doc;
 
-  // Update selected state in list
-  document.querySelectorAll('#panel-vault .vault-item').forEach(el => el.classList.remove('selected'));
-  event && event.currentTarget && event.currentTarget.classList.add('selected');
-  // Re-render to update selection
+  // Re-render list with updated selection highlight
   const filtered = vaultFilter === 'الكل' ? VAULT_DOCS : VAULT_DOCS.filter(d => d.type === vaultFilter);
   renderVaultList(filtered);
 
-  // Update preview
-  const titleEl = document.querySelector('#panel-vault .vp-toolbar span');
+  // Update preview title
+  const titleEl = document.querySelector('#panel-vault #vault-doc-title');
   if (titleEl) titleEl.textContent = doc.name;
-  const bodyEl = document.querySelector('#panel-vault .doc-page');
-  if (bodyEl) bodyEl.innerHTML = doc.content;
 
-  // Update risk badge
-  const riskTag = document.querySelector('#panel-vault .vp-toolbar .risk-badge');
-  // (handled inline)
+  // Update preview body
+  const bodyEl = document.querySelector('#panel-vault #vault-doc-body');
+  if (bodyEl) {
+    bodyEl.innerHTML = doc.content;
+    bodyEl.scrollTop = 0;
+  }
 }
 
 function vaultSearch(val) {
-  const query = val.toLowerCase().trim();
+  const query = val.trim();
   const base = vaultFilter === 'الكل' ? VAULT_DOCS : VAULT_DOCS.filter(d => d.type === vaultFilter);
-  const filtered = query ? base.filter(d => d.name.includes(val) || d.type.includes(val)) : base;
+  const filtered = query ? base.filter(d => d.name.includes(query) || d.type.includes(query)) : base;
   renderVaultList(filtered);
   // Update count
-  const countEl = document.querySelector('#panel-vault .vault-header span');
+  const countEl = document.getElementById('vault-count');
   if (countEl) countEl.textContent = `المستندات (${filtered.length})`;
 }
 
@@ -157,7 +155,7 @@ function vaultFilterByType(type) {
   vaultFilter = type;
   const filtered = type === 'الكل' ? VAULT_DOCS : VAULT_DOCS.filter(d => d.type === type);
   renderVaultList(filtered);
-  const countEl = document.querySelector('#panel-vault .vault-header span');
+  const countEl = document.getElementById('vault-count');
   if (countEl) countEl.textContent = `المستندات (${filtered.length})`;
 }
 
@@ -244,7 +242,7 @@ function simulateUploadFile(filename) {
           VAULT_DOCS.unshift(newDoc);
           renderVaultList(VAULT_DOCS);
           // Update count
-          const countEl = document.querySelector('#panel-vault .vault-header span');
+          const countEl = document.getElementById('vault-count');
           if (countEl) countEl.textContent = `المستندات (${VAULT_DOCS.length})`;
           showToast('تم رفع المستند بنجاح ✓', 'green');
         }, 400);
@@ -263,6 +261,27 @@ function deleteVaultDoc(docId) {
     renderVaultList(VAULT_DOCS);
     showToast('تم حذف المستند', 'red');
   }
+}
+
+function vaultGoToRisk() {
+  if (typeof showPanel === 'function') showPanel('risk');
+  showToast('تم فتح تقييم المخاطر لـ: ' + currentVaultDoc.name, 'blue');
+}
+
+function vaultGoToQA() {
+  if (typeof showPanel === 'function') showPanel('qa');
+  // Pre-fill the chat with context about the current document
+  setTimeout(() => {
+    const input = document.getElementById('chat-input');
+    if (input) {
+      input.value = 'حلل المستند: ' + currentVaultDoc.name;
+      input.focus();
+    }
+  }, 300);
+}
+
+function vaultDownload() {
+  showToast('جارٍ تحميل: ' + currentVaultDoc.name + ' (' + currentVaultDoc.size + ')', 'green');
 }
 
 /* ═══════════════════════════════════════════════
@@ -576,8 +595,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const riskBtn = vaultPanel.querySelector('button[onclick*="risk"]');
     // Already wired
 
-    // Add delete button to each vault item
+    // Render list and populate preview with first document
     renderVaultList(VAULT_DOCS);
+    // Populate preview with first document on load
+    const firstDoc = VAULT_DOCS[0];
+    const titleEl = document.getElementById('vault-doc-title');
+    const bodyEl = document.getElementById('vault-doc-body');
+    if (titleEl) titleEl.textContent = firstDoc.name;
+    if (bodyEl) bodyEl.innerHTML = firstDoc.content;
   }
 
   // ── Q&A: Wire suggested questions ──

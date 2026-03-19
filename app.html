@@ -685,75 +685,38 @@ input,textarea,select{font-family:inherit}
 <div class="sec-row">
 <div class="sec-title">خزنة المستندات</div>
 <div style="display:flex;gap:8px">
-<button class="btn btn-ghost btn-sm" onclick="cycleVaultFilter(this)">فلترة</button>
-<button class="btn btn-primary btn-sm" onclick="showPanel('vault-upload')">
-<svg fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="14"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
-            رفع مستند
-          </button>
+<button class="btn btn-primary btn-sm" onclick="showUploadModal()">
+<svg fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewBox="0 0 24 24" width="14"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
+ رفع مستند
+</button>
 </div>
 </div>
 <div class="vault-grid">
 <div class="vault-list">
 <div class="vault-header">
-<span style="font-size:14px;font-weight:700;color:var(--navy)">المستندات (٢٤)</span>
-<select class="form-select" style="width:auto;padding:5px 10px;font-size:12px">
-<option>الكل</option><option>عقود</option><option>مذكرات</option><option>أحكام</option>
+<span id="vault-count" style="font-size:14px;font-weight:700;color:var(--navy)">المستندات (٦)</span>
+<select id="vault-type-filter" class="form-select" style="width:auto;padding:5px 10px;font-size:12px" onchange="vaultFilterByType(this.value)">
+<option value="الكل">الكل</option><option value="عقود">عقود</option><option value="مذكرات">مذكرات</option><option value="أحكام">أحكام</option>
 </select>
 </div>
 <div class="vault-search">
-<svg fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
-<input placeholder="ابحث في المستندات..." type="text"/>
+<svg fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewBox="0 0 24 24" width="13"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
+<input id="vault-search-input" placeholder="ابحث في المستندات..." type="text" oninput="vaultSearch(this.value)"/>
 </div>
-<div class="vault-items">
-<div class="vault-item selected" onclick="selectVaultItem(this)">
-<div class="vi-icon pdf"><svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg></div>
-<div><div class="vi-name">عقد إيجار تجاري — الفجر</div><div class="vi-meta">PDF · ٢.٤ MB · ٢٠ مارس ٢٠٢٦</div></div>
-<span class="tag tag-red" style="font-size:10px;margin-inline-start:auto">مخاطر عالية</span>
-</div>
-<div class="vault-item" onclick="selectVaultItem(this)">
-<div class="vi-icon doc"><svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg></div>
-<div><div class="vi-name">عقد مرابحة — البنك الإسلامي</div><div class="vi-meta">DOCX · ١.١ MB · ١٨ مارس ٢٠٢٦</div></div>
-<span class="tag tag-green" style="font-size:10px;margin-inline-start:auto">مطابق</span>
-</div>
-<div class="vault-item" onclick="selectVaultItem(this)">
-<div class="vi-icon pdf"><svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg></div>
-<div><div class="vi-name">اتفاقية شراكة — مجموعة النور</div><div class="vi-meta">PDF · ٣.٨ MB · ١٥ مارس ٢٠٢٦</div></div>
-<span class="tag tag-amber" style="font-size:10px;margin-inline-start:auto">متوسط</span>
-</div>
-<div class="vault-item" onclick="selectVaultItem(this)">
-<div class="vi-icon doc"><svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg></div>
-<div><div class="vi-name">عقد توظيف — مدير تنفيذي</div><div class="vi-meta">DOCX · ٠.٩ MB · ١٢ مارس ٢٠٢٦</div></div>
-<span class="tag tag-green" style="font-size:10px;margin-inline-start:auto">منخفض</span>
-</div>
-<div class="vault-item" onclick="selectVaultItem(this)">
-<div class="vi-icon pdf"><svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2" viewbox="0 0 24 24" width="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg></div>
-<div><div class="vi-name">حكم محكمة استئناف ٢٠٢٤</div><div class="vi-meta">PDF · ١.٦ MB · ١٠ مارس ٢٠٢٦</div></div>
-</div>
+<div id="vault-items" class="vault-items">
+<!-- Rendered by phase3.js -->
 </div>
 </div>
 <div class="vault-preview">
 <div class="vp-toolbar">
-<span style="font-size:14px;font-weight:700;color:var(--navy);flex:1">عقد إيجار تجاري — شركة الفجر</span>
-<button class="btn btn-ghost btn-sm" onclick="showPanel('risk')">تقييم المخاطر</button>
-<button class="btn btn-ghost btn-sm" onclick="showPanel('qa')">اسأل عنه</button>
-<button class="btn btn-primary btn-sm" onclick="showToast('جارٍ تحميل المستند...', 'blue')">تحميل</button>
+<span id="vault-doc-title" style="font-size:14px;font-weight:700;color:var(--navy);flex:1">عقد إيجار تجاري — شركة الفجر</span>
+<button class="btn btn-ghost btn-sm" onclick="vaultGoToRisk()">تقييم المخاطر</button>
+<button class="btn btn-ghost btn-sm" onclick="vaultGoToQA()">اسأل عنه</button>
+<button class="btn btn-primary btn-sm" onclick="vaultDownload()">تحميل</button>
 </div>
 <div class="vp-body">
-<div class="doc-page">
-<h3>عقد إيجار تجاري</h3>
-<p>إنه في يوم الأحد الموافق ١٥/٣/٢٠٢٦ تم الاتفاق بين كل من:</p>
-<p><strong>الطرف الأول (المؤجر):</strong> شركة العقارات الذهبية المحدودة، المسجلة في المملكة الأردنية الهاشمية برقم (١٢٣٤٥٦).</p>
-<p><strong>الطرف الثاني (المستأجر):</strong> شركة الفجر للتجارة والتوزيع، المسجلة برقم (٧٨٩٠١٢).</p>
-<h3>المادة الأولى: موضوع العقد</h3>
-<p>يقوم الطرف الأول بتأجير المحل التجاري الكائن في <span class="highlight-warn">عمّان، شارع الملكة نور، مجمع الأندلس التجاري، الطابق الأرضي، رقم (١٥)</span> للطرف الثاني.</p>
-<h3>المادة الثانية: مدة الإيجار</h3>
-<p>تبدأ مدة الإيجار اعتباراً من <span class="highlight-good">١/٤/٢٠٢٦</span> وتنتهي في <span class="highlight-good">٣١/٣/٢٠٢٩</span> أي لمدة ثلاث سنوات قابلة للتجديد.</p>
-<h3>المادة الثالثة: بدل الإيجار</h3>
-<p>يتفق الطرفان على أن يكون بدل الإيجار السنوي <strong>٢٤,٠٠٠ دينار أردني</strong> يُسدَّد شهرياً بمبلغ ٢,٠٠٠ دينار.</p>
-<h3>المادة الرابعة: التزامات المستأجر</h3>
-<p><span class="highlight-risk">يحق للمؤجر إنهاء العقد دون إشعار مسبق في حال تأخر المستأجر عن سداد بدل الإيجار لمدة تزيد عن ٧ أيام.</span></p>
-<h3>المادة الخامسة: الضمانات</h3>
-<p>يلتزم المستأجر بتقديم ضمان بنكي بقيمة ٣ أشهر من بدل الإيجار.</p>
+<div id="vault-doc-body" class="doc-page">
+<!-- Rendered by phase3.js -->
 </div>
 </div>
 </div>
