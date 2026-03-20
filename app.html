@@ -815,7 +815,7 @@ input,textarea,select{font-family:inherit}
 <div class="ri-desc">يمنح العقد المؤجر حق الإنهاء الفوري دون إشعار مسبق عند تأخر ٧ أيام فقط. هذا مخالف للمادة (٥٦٢) من القانون المدني الأردني التي تشترط إشعاراً لا يقل عن ٣٠ يوماً.</div>
 <div style="margin-top:8px;display:flex;gap:8px;flex-direction:row-reverse">
 <button class="btn btn-ghost btn-sm" onclick="suggestEdit()">اقتراح تعديل</button>
-<button class="btn btn-ghost btn-sm" onclick="showToast('فتح نص القانون المرجعي...', 'blue')">عرض القانون</button>
+<button class="btn btn-ghost btn-sm" onclick="showLawReference('م.٥٦٢')">عرض القانون</button>
 </div>
 </div>
 </div>
@@ -834,6 +834,9 @@ input,textarea,select{font-family:inherit}
 <div>
 <div class="ri-title">⚠ غياب بند القوة القاهرة</div>
 <div class="ri-desc">لا يوجد بند يعالج حالات القوة القاهرة (جائحة، كوارث طبيعية، إلخ). هذا يعرض المستأجر لمسؤولية قانونية في حالات خارجة عن إرادته.</div>
+<div style="margin-top:8px;display:flex;gap:8px;flex-direction:row-reverse">
+<button class="btn btn-primary btn-sm" onclick="showPanel('clauses')">إضافة بند من المكتبة</button>
+</div>
 </div>
 </div>
 <div class="risk-item">
@@ -841,6 +844,9 @@ input,textarea,select{font-family:inherit}
 <div>
 <div class="ri-title">⚡ صياغة غامضة — وصف العقار</div>
 <div class="ri-desc">وصف العقار المؤجر غير دقيق ولا يتضمن المساحة الإجمالية بالمتر المربع. يُنصح بإضافة رقم الصك العقاري والمساحة التفصيلية.</div>
+<div style="margin-top:8px;display:flex;gap:8px;flex-direction:row-reverse">
+<button class="btn btn-ghost btn-sm" onclick="suggestEdit('صياغة غامضة — وصف العقار', 'وصف العقار المؤجر: المحل التجاري الكائن في عمّان، شارع الملكة نور، مجمع الأندلس التجاري، الطابق الأرضي، رقم (١٥).', 'وصف العقار المؤجر: المحل التجاري الكائن في عمّان، شارع الملكة نور، مجمع الأندلس التجاري، الطابق الأرضي، رقم (١٥)، بمساحة إجمالية (١٢٠) متراً مربعاً، رقم الصك العقاري (٢٠٢٤/٤٥٦٧٨).')">اقتراح تعديل</button>
+</div>
 </div>
 </div>
 <div class="risk-item">

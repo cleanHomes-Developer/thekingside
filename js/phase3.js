@@ -529,11 +529,14 @@ function applyRiskEdit(title) {
   // Mark risk item as resolved
   const riskItems = document.querySelectorAll('#panel-risk .risk-item');
   riskItems.forEach(item => {
-    if (item.querySelector('.ri-title')?.textContent.includes('إنهاء')) {
-      item.style.opacity = '0.5';
+    const titleEl = item.querySelector('.ri-title');
+    if (titleEl && titleEl.textContent.includes(title.substring(0, 8))) {
+      item.style.opacity = '0.6';
       item.querySelector('.ri-dot').style.background = 'var(--green)';
-      const titleEl = item.querySelector('.ri-title');
-      if (titleEl) titleEl.textContent = '✓ تم تعديل بند الإنهاء';
+      titleEl.textContent = '✓ تم تعديل: ' + title.substring(0, 20);
+      // Hide action buttons after resolution
+      const btnContainer = item.querySelector('div[style*="margin-top:8px"]');
+      if (btnContainer) btnContainer.style.display = 'none';
     }
   });
 }
@@ -565,7 +568,7 @@ function showLawReference(law) {
       <div style="font-size:12px;color:var(--gray-4);margin-bottom:20px">المصدر: ${data.source}</div>
       <div style="display:flex;gap:10px">
         <button class="btn btn-primary" onclick="document.getElementById('law-ref-modal').remove()">حسناً</button>
-        <button class="btn btn-ghost" onclick="showToast('تم نسخ نص المادة ✓', 'green')">نسخ النص</button>
+        <button class="btn btn-ghost" onclick="copyToClipboard('${data.text}')">نسخ النص</button>
       </div>
     </div>`;
   document.body.appendChild(m);
@@ -702,18 +705,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── RISK: Wire suggest edit and law reference buttons ──
-  const riskPanel = document.getElementById('panel-risk');
-  if (riskPanel) {
-    riskPanel.querySelectorAll('button').forEach(btn => {
-      if (btn.textContent.includes('اقتراح تعديل')) {
-        btn.setAttribute('onclick', 'suggestEdit()');
-      }
-      if (btn.textContent.includes('عرض القانون')) {
-        btn.setAttribute('onclick', "showLawReference('م.٥٦٢')");
-      }
-    });
-  }
+  // ── RISK: ESC key closes any open modal ──
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.getElementById('suggest-edit-modal')?.remove();
+      document.getElementById('law-ref-modal')?.remove();
+    }
+  });
 
   // ── HIGHLIGHTS: Add filter toolbar and export button ──
   const highlightsPanel = document.getElementById('panel-highlights');
