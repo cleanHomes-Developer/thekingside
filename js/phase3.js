@@ -609,21 +609,28 @@ function showHighlightDetail(key) {
 }
 
 function filterHighlights(type) {
-  // Update filter button states
+  // Update filter button states — only the clicked tab should be active
   document.querySelectorAll('#panel-highlights .filter-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.type === type || type === 'all');
+    btn.classList.toggle('active', btn.dataset.type === type);
   });
 
   // Show/hide highlight spans in doc
   const docPage = document.querySelector('#panel-highlights .doc-page');
   if (!docPage) return;
 
+  const validTypes = ['risk', 'warn', 'good'];
   docPage.querySelectorAll('.highlight-risk, .highlight-warn, .highlight-good').forEach(span => {
-    if (type === 'all') { span.style.opacity = '1'; return; }
+    if (type === 'all') {
+      span.style.opacity = '1';
+      span.style.pointerEvents = '';
+      return;
+    }
     const isRisk = span.classList.contains('highlight-risk');
     const isWarn = span.classList.contains('highlight-warn');
     const isGood = span.classList.contains('highlight-good');
-    span.style.opacity = (type === 'risk' && isRisk) || (type === 'warn' && isWarn) || (type === 'good' && isGood) ? '1' : '0.2';
+    const isMatch = (type === 'risk' && isRisk) || (type === 'warn' && isWarn) || (type === 'good' && isGood);
+    span.style.opacity = isMatch ? '1' : '0.15';
+    span.style.pointerEvents = isMatch ? '' : 'none';
   });
 
   // Show/hide detail cards
@@ -640,8 +647,62 @@ function filterHighlights(type) {
 }
 
 function exportHighlights() {
-  showToast('جارٍ تصدير التقرير...', 'blue');
-  setTimeout(() => showToast('تم تصدير تقرير التمييز الذكي ✓', 'green'), 1500);
+  showToast('جارٍ إنشاء التقرير...', 'blue');
+
+  const highlights = [
+    { type: 'risk', icon: '⚠', color: '#dc2626', title: 'إنهاء دون إشعار', clause: 'المادة الرابعة', text: 'يحق للمؤجر إنهاء العقد دون إشعار مسبق في حال تأخر المستأجر عن سداد بدل الإيجار لمدة تزيد عن ٧ أيام.', note: 'مخالف للمادة (٥٦٢) من القانون المدني. يُنصح بتعديل المدة إلى ٣٠ يوماً على الأقل.' },
+    { type: 'warn', icon: '⚡', color: '#d97706', title: 'صيانة غير محددة', clause: 'المادة السادسة', text: 'تقع على عاتق المستأجر الصيانة الدورية للمحل دون تحديد نوع الصيانة أو حدودها المالية.', note: 'يجب تحديد نوع الصيانة والحد المالي الذي يتجاوزه الالتزام إلى المؤجر.' },
+    { type: 'risk', icon: '⚠', color: '#dc2626', title: 'غياب بند التأمين', clause: 'المادة السابعة', text: 'لم يُشر العقد إلى أي التزام بالتأمين على المحل أو محتوياته.', note: 'يُنصح بإضافة بند يُلزم المستأجر بالتأمين على المحل ضد الحريق والسرقة.' },
+    { type: 'good', icon: '✓', color: '#16a34a', title: 'ضمان بنكي محدد', clause: 'المادة الخامسة', text: 'يلتزم المستأجر بتقديم ضمان بنكي بقيمة ٣ أشهر من بدل الإيجار قبل استلام المحل.', note: 'تحديد الضمان البنكي بـ٣ أشهر يتوافق مع أفضل الممارسات في عقود الإيجار التجاري.' },
+    { type: 'good', icon: '✓', color: '#16a34a', title: 'تجديد تلقائي واضح', clause: 'المادة الثامنة', text: 'يُجدَّد العقد تلقائياً لمدة مماثلة ما لم يُخطر أحد الطرفين الآخر برغبته في عدم التجديد قبل ٩٠ يوماً.', note: 'مدة الإشعار ٩٠ يوماً معقولة وتتوافق مع المعيار التجاري المعمول به.' }
+  ];
+
+  const rows = highlights.map(h => `
+    <tr style="border-bottom:1px solid #e5e7eb">
+      <td style="padding:12px 16px;font-weight:700;color:${h.color}">${h.icon} ${h.title}</td>
+      <td style="padding:12px 16px;color:#6b7280">${h.clause}</td>
+      <td style="padding:12px 16px;font-size:13px;line-height:1.6">${h.text}</td>
+      <td style="padding:12px 16px;font-size:13px;color:#374151;line-height:1.6">${h.note}</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><title>تقرير التمييز الذكي — ميزان</title>
+<style>body{font-family:system-ui,sans-serif;padding:40px;color:#111;direction:rtl}
+h1{color:#1e3a5f;border-bottom:2px solid #59bde6;padding-bottom:12px}
+table{width:100%;border-collapse:collapse;margin-top:24px}
+th{background:#1e3a5f;color:#fff;padding:12px 16px;text-align:right;font-size:14px}
+tr:nth-child(even){background:#f9fafb}
+.summary{display:flex;gap:16px;margin:20px 0}
+.badge{padding:8px 16px;border-radius:8px;font-weight:700;font-size:14px}
+.red{background:#fee2e2;color:#dc2626}
+.amber{background:#fef3c7;color:#d97706}
+.green{background:#dcfce7;color:#16a34a}
+</style></head>
+<body>
+<h1>📋 تقرير التمييز الذكي</h1>
+<p style="color:#6b7280">المستند: عقد إيجار تجاري — شركة الفجر &nbsp;|&nbsp; تاريخ التقرير: ${new Date().toLocaleDateString('ar-JO')}</p>
+<div class="summary">
+  <span class="badge red">⚠ مخاطر عالية: 2</span>
+  <span class="badge amber">⚡ تحذيرات: 1</span>
+  <span class="badge green">✓ إيجابيات: 2</span>
+</div>
+<table>
+<thead><tr><th>النقطة</th><th>المادة</th><th>النص المُعلَّم</th><th>الملاحظة والتوصية</th></tr></thead>
+<tbody>${rows}</tbody>
+</table>
+<p style="margin-top:32px;font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px">تم إنشاء هذا التقرير بواسطة ميزان Legal AI — للاستخدام القانوني فقط</p>
+</body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'تقرير-التمييز-الذكي-ميزان.html';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  setTimeout(() => showToast('تم تصدير تقرير التمييز الذكي ✓', 'green'), 500);
 }
 
 /* ═══════════════════════════════════════════════
