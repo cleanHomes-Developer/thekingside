@@ -382,10 +382,13 @@ function sendMessage() {
   input.value = '';
   input.style.height = 'auto';
 
-  // Add user message
+  // Add user message (use textContent to prevent XSS)
   const userMsg = document.createElement('div');
   userMsg.className = 'msg user';
-  userMsg.innerHTML = `<div class="msg-bubble">${question}</div>`;
+  const userBubble = document.createElement('div');
+  userBubble.className = 'msg-bubble';
+  userBubble.textContent = question; // safe: no innerHTML injection
+  userMsg.appendChild(userBubble);
   msgs.appendChild(userMsg);
 
   // Add typing indicator
@@ -474,6 +477,8 @@ function newChat() {
     <div class="msg ai">
       <div class="msg-bubble">مرحباً! أنا ميزان، مساعدك القانوني الذكي. يمكنني مساعدتك في تحليل العقود، البحث في القوانين، وتقديم إجابات قانونية موثقة بالمصادر. كيف يمكنني مساعدتك اليوم؟</div>
     </div>`;
+  // Reset conversation history so new chat has no memory of previous session
+  window._chatHistory = [];
   showToast('تم بدء محادثة جديدة', 'blue');
 }
 
