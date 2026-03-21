@@ -953,36 +953,57 @@ input,textarea,select{font-family:inherit}
 </div>
 <div class="card">
 <div class="sec-title">مولّد العقود بالذكاء الاصطناعي</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+<!-- Row 1: Contract type + Jurisdiction -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:0">
 <div class="form-group">
 <label class="form-label">نوع العقد</label>
-<select class="form-select">
-<option>عقد إيجار تجاري</option><option>عقد بيع عقار</option><option>عقد شراكة</option><option>عقد توريد</option><option>عقد توظيف</option><option>عقد مرابحة</option>
+<select class="form-select" id="drafting-contract-type" onchange="updateDraftingForm()">
+<option value="عقد إيجار تجاري">🏢 عقد إيجار تجاري</option>
+<option value="عقد بيع عقار">🏠 عقد بيع عقار</option>
+<option value="عقد شراكة">🤝 عقد شراكة</option>
+<option value="عقد توريد">📦 عقد توريد</option>
+<option value="عقد توظيف">👤 عقد توظيف</option>
+<option value="عقد مرابحة">☪ عقد مرابحة</option>
 </select>
 </div>
 <div class="form-group">
 <label class="form-label">الولاية القضائية</label>
-<select class="form-select">
+<select class="form-select" id="drafting-jurisdiction">
 <option>الأردن</option><option>الإمارات</option><option>السعودية</option><option>مصر</option><option>الكويت</option>
 </select>
 </div>
+</div>
+
+<!-- Row 2: Parties -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
 <div class="form-group">
-<label class="form-label">اسم الطرف الأول</label>
-<input class="form-input" placeholder="الاسم أو اسم الشركة" type="text"/>
+<label class="form-label" id="drafting-party1-label">اسم الطرف الأول (المؤجر)</label>
+<input class="form-input" id="drafting-party1" placeholder="الاسم أو اسم الشركة" type="text"/>
 </div>
 <div class="form-group">
-<label class="form-label">اسم الطرف الثاني</label>
-<input class="form-input" placeholder="الاسم أو اسم الشركة" type="text"/>
-</div>
-<div class="form-group" style="grid-column:1/-1">
-<label class="form-label">تفاصيل إضافية</label>
-<textarea class="form-textarea" placeholder="أضف أي تفاصيل خاصة بالعقد (المبلغ، المدة، الشروط الخاصة...)"></textarea>
+<label class="form-label" id="drafting-party2-label">اسم الطرف الثاني (المستأجر)</label>
+<input class="form-input" id="drafting-party2" placeholder="الاسم أو اسم الشركة" type="text"/>
 </div>
 </div>
-<button class="btn btn-primary btn-lg" id="generate-btn" style="margin-top:8px">
+
+<!-- Dynamic fields container -->
+<div id="drafting-dynamic-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px"></div>
+
+<!-- Extra details -->
+<div class="form-group" style="margin-top:12px">
+<label class="form-label">تفاصيل وشروط إضافية (اختياري)</label>
+<textarea class="form-textarea" id="drafting-extra" placeholder="أضف أي شروط خاصة أو ملاحظات إضافية..."></textarea>
+</div>
+
+<!-- Generate button -->
+<button class="btn btn-primary btn-lg" id="generate-btn" onclick="generateContractDocx()" style="margin-top:12px;width:100%">
 <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-          توليد العقد بالذكاء الاصطناعي
-        </button>
+ توليد العقد وتنزيله (Word)
+</button>
+
+<!-- Status / progress -->
+<div id="contract-status" style="display:none;margin-top:12px;padding:14px 18px;border-radius:var(--r-md);background:rgba(89,189,230,.08);border:1.5px solid var(--cyan);text-align:center;font-size:14px;color:var(--navy)"></div>
 </div>
 <div id="contract-output" style="display:none;margin-top:20px"></div>
 </div>
@@ -2234,46 +2255,137 @@ function doResearch() {
   }, 900);
 }
 
-// ── DRAFTING: AI generate simulation ──
-function generateContract() {
-  const btn = document.getElementById('generate-btn');
-  const output = document.getElementById('contract-output');
-  if (!btn || !output) return;
-  const contractType = document.querySelector('#panel-drafting .form-select');
-  const party1 = document.querySelectorAll('#panel-drafting .form-input')[0];
-  const party2 = document.querySelectorAll('#panel-drafting .form-input')[1];
-  const p1 = party1 && party1.value ? party1.value : 'الطرف الأول';
-  const p2 = party2 && party2.value ? party2.value : 'الطرف الثاني';
-  const type = contractType ? contractType.value : 'عقد';
-  btn.disabled = true;
-  btn.textContent = 'جارٍ التوليد...';
-  output.style.display = 'none';
-  setTimeout(() => {
-    output.style.display = 'block';
-    output.innerHTML = `
-      <div class="doc-page" style="max-width:100%">
-        <h3 style="text-align:center;margin-bottom:20px">${type}</h3>
-        <p>إنه في يوم ${new Date().toLocaleDateString('ar-JO')} تم الاتفاق بين كل من:</p>
-        <p><strong>الطرف الأول:</strong> ${p1}</p>
-        <p><strong>الطرف الثاني:</strong> ${p2}</p>
-        <h3>المادة الأولى: موضوع العقد</h3>
-        <p>يتفق الطرفان على تنفيذ ${type} وفقاً للشروط والأحكام المنصوص عليها في هذا العقد وطبقاً للتشريعات الأردنية النافذة.</p>
-        <h3>المادة الثانية: مدة العقد</h3>
-        <p>تبدأ مدة هذا العقد من تاريخ توقيعه وتنتهي بعد سنة واحدة قابلة للتجديد باتفاق الطرفين.</p>
-        <h3>المادة الثالثة: الالتزامات</h3>
-        <p>يلتزم كل طرف بتنفيذ ما يترتب عليه من التزامات بموجب هذا العقد في المواعيد المتفق عليها.</p>
-        <h3>المادة الرابعة: فض النزاعات</h3>
-        <p>يُحسم أي نزاع ينشأ عن هذا العقد أمام المحاكم الأردنية المختصة وفق أحكام قانون أصول المحاكمات المدنية.</p>
-        <div style="margin-top:30px;display:flex;gap:40px;justify-content:space-around">
-          <div style="text-align:center"><div style="font-weight:700;margin-bottom:40px">توقيع الطرف الأول</div><div style="border-top:1px solid #ccc;padding-top:6px;font-size:13px;color:var(--gray-4)">${p1}</div></div>
-          <div style="text-align:center"><div style="font-weight:700;margin-bottom:40px">توقيع الطرف الثاني</div><div style="border-top:1px solid #ccc;padding-top:6px;font-size:13px;color:var(--gray-4)">${p2}</div></div>
-        </div>
-      </div>`;
-    btn.disabled = false;
-    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> توليد العقد بالذكاء الاصطناعي';
-    showToast('تم توليد العقد بنجاح ✓', 'green');
-  }, 1800);
+// ── DRAFTING: Dynamic form fields per contract type ──
+const DRAFTING_FIELDS = {
+  'عقد إيجار تجاري': {
+    party1: 'اسم المؤجر', party2: 'اسم المستأجر',
+    fields: ['العقار وعنوانه','المساحة (م²)','بدل الإيجار الشهري','مدة الإيجار','قيمة الضمان البنكي','الغرض من الاستخدام']
+  },
+  'عقد بيع عقار': {
+    party1: 'اسم البائع', party2: 'اسم المشتري',
+    fields: ['وصف العقار ورقم الصك','ثمن البيع الإجمالي','طريقة الدفع (نقد/أقساط)','تاريخ التسليم','الرسوم والضرائب (على من تقع)']
+  },
+  'عقد شراكة': {
+    party1: 'اسم الشريك الأول', party2: 'اسم الشريك الثاني',
+    fields: ['اسم الشركة ومجال العمل','رأس المال الإجمالي','حصة الشريك الأول (%)','حصة الشريك الثاني (%)','نسبة توزيع الأرباح','مدة الشراكة']
+  },
+  'عقد توريد': {
+    party1: 'اسم المورد', party2: 'اسم المشتري',
+    fields: ['البضاعة/الخدمة الموردة','الكمية الإجمالية','سعر الوحدة','إجمالي قيمة العقد','مواعيد التسليم','شروط الدفع']
+  },
+  'عقد توظيف': {
+    party1: 'اسم صاحب العمل', party2: 'اسم الموظف',
+    fields: ['المسمى الوظيفي','الراتب الأساسي الشهري','مدة العقد (محدد/غير محدد)','ساعات العمل الأسبوعية','فترة التجربة','بدلات ومزايا إضافية']
+  },
+  'عقد مرابحة': {
+    party1: 'اسم الممول (البائع)', party2: 'اسم العميل (المشتري)',
+    fields: ['وصف السلعة','ثمن الشراء الأصلي','هامش الربح (%)','إجمالي ثمن المرابحة','عدد الأقساط','قيمة القسط الشهري']
+  }
+};
+
+function updateDraftingForm() {
+  const typeEl = document.getElementById('drafting-contract-type');
+  const container = document.getElementById('drafting-dynamic-fields');
+  const p1Label = document.getElementById('drafting-party1-label');
+  const p2Label = document.getElementById('drafting-party2-label');
+  if (!typeEl || !container) return;
+
+  const config = DRAFTING_FIELDS[typeEl.value] || DRAFTING_FIELDS['عقد إيجار تجاري'];
+
+  // Update party labels
+  if (p1Label) p1Label.textContent = config.party1;
+  if (p2Label) p2Label.textContent = config.party2;
+
+  // Render dynamic fields
+  container.innerHTML = config.fields.map((label, i) => `
+    <div class="form-group">
+      <label class="form-label">${label}</label>
+      <input class="form-input drafting-field" data-field="${label}" placeholder="أدخل ${label}..." type="text"/>
+    </div>
+  `).join('');
 }
+
+// ── DRAFTING: Real Word generation via backend ──
+async function generateContractDocx() {
+  const btn = document.getElementById('generate-btn');
+  const statusEl = document.getElementById('contract-status');
+  if (!btn) return;
+
+  const contractType = document.getElementById('drafting-contract-type')?.value || 'عقد إيجار تجاري';
+  const jurisdiction = document.getElementById('drafting-jurisdiction')?.value || 'الأردن';
+  const party1 = document.getElementById('drafting-party1')?.value?.trim() || 'الطرف الأول';
+  const party2 = document.getElementById('drafting-party2')?.value?.trim() || 'الطرف الثاني';
+  const extraDetails = document.getElementById('drafting-extra')?.value?.trim() || '';
+
+  // Collect dynamic fields
+  const fields = {};
+  document.querySelectorAll('.drafting-field').forEach(inp => {
+    if (inp.value.trim()) fields[inp.dataset.field] = inp.value.trim();
+  });
+
+  // Validate
+  if (!party1 || party1 === 'الطرف الأول') {
+    showToast('يرجى إدخال اسم الطرف الأول', 'red'); return;
+  }
+  if (!party2 || party2 === 'الطرف الثاني') {
+    showToast('يرجى إدخال اسم الطرف الثاني', 'red'); return;
+  }
+
+  // UI: loading state
+  btn.disabled = true;
+  btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> جارس توليد العقد...`;
+  if (statusEl) {
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = `<span style="animation:pulse 1s infinite">⏳</span> جارس إنشاء ${contractType} بالذكاء الاصطناعي — قد يستغرق هذا حتى كم ثوان، يُرجى الانتظار...`;
+  }
+
+  try {
+    const response = await fetch('http://localhost:5051/api/generate-contract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contract_type: contractType, jurisdiction, party1, party2, fields, extra_details: extraDetails })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'خطأ غير متوقع');
+    }
+
+    // Download the Word file
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const filename = `${contractType.replace(/ /g,'_')}_${party1.substring(0,10)}_${new Date().toISOString().slice(0,10)}.docx`;
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // Success UI
+    if (statusEl) {
+      statusEl.style.background = 'rgba(30,158,107,.08)';
+      statusEl.style.borderColor = 'var(--green)';
+      statusEl.innerHTML = `✅ تم توليد العقد وتنزيله بنجاح &mdash; <strong>${filename}</strong>`;
+    }
+    showToast('تم توليد العقد وتنزيله ✓', 'green');
+
+  } catch (err) {
+    if (statusEl) {
+      statusEl.style.background = 'rgba(220,53,69,.08)';
+      statusEl.style.borderColor = 'var(--red)';
+      statusEl.innerHTML = `❌ خطأ: ${err.message}`;
+    }
+    showToast('خطأ في توليد العقد', 'red');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> توليد العقد وتنزيله (Word)`;
+  }
+}
+
+// Initialize drafting form on load
+document.addEventListener('DOMContentLoaded', () => { if (document.getElementById('drafting-contract-type')) updateDraftingForm(); });
 
 // ── MATTERS: add new matter ──
 function addMatter() {
